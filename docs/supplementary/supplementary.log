@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.8.26)  26 AUG 2022 16:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.8.26)  26 AUG 2022 16:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -710,27 +710,27 @@ Overfull \hbox (5.21014pt too wide) in alignment at lines 369--409
 ] [9
 
 ]
-Overfull \hbox (2.30423pt too wide) in paragraph at lines 641--641
+Overfull \hbox (2.30423pt too wide) in paragraph at lines 659--659
 []|[]\T1/lmr/m/n/6 kappa_emotion1:intensity1[]|  
  []
 
 
-Overfull \hbox (2.30423pt too wide) in paragraph at lines 653--653
+Overfull \hbox (2.30423pt too wide) in paragraph at lines 671--671
 []|[]\T1/lmr/m/n/6 kappa_emotion2:intensity1[]|  
  []
 
 
-Overfull \hbox (2.30423pt too wide) in paragraph at lines 665--665
+Overfull \hbox (2.30423pt too wide) in paragraph at lines 683--683
 []|[]\T1/lmr/m/n/6 kappa_emotion3:intensity1[]|  
  []
 
 
-Overfull \hbox (2.30423pt too wide) in paragraph at lines 677--677
+Overfull \hbox (2.30423pt too wide) in paragraph at lines 695--695
 []|[]\T1/lmr/m/n/6 kappa_emotion4:intensity1[]|  
  []
 
 
-Overfull \hbox (2.30423pt too wide) in paragraph at lines 689--689
+Overfull \hbox (2.30423pt too wide) in paragraph at lines 707--707
 []|[]\T1/lmr/m/n/6 kappa_emotion5:intensity1[]|  
  []
 
@@ -745,13 +745,13 @@ Package rerunfilecheck Info: File `supplementary.out' has not changed.
 Here is how much of TeX's memory you used:
  13739 strings out of 479489
  219078 string characters out of 5873407
- 597669 words of memory out of 5000000
+ 607350 words of memory out of 5000000
  32035 multiletter control sequences out of 15000+600000
  551445 words of font info for 82 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  72i,8n,77p,1613b,618s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}</Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx6.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/thomasquettier/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on supplementary.pdf (18 pages, 3063621 bytes).
+Output written on supplementary.pdf (18 pages, 2940997 bytes).
 PDF statistics:
  515 PDF objects out of 1000 (max. 8388607)
  386 compressed objects within 4 object streams

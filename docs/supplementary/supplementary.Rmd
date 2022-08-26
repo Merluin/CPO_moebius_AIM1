@@ -1,5 +1,5 @@
 ---
-title: "**Mapping the Perception-space of Facial Expressions (Online Participants)**"
+title: "**Mapping the Perception-space of Facial Expressions (Moebius Participants)**"
 subtitle: "Supplementary Materials"
 author: 
   - "Thomas Quettier"
