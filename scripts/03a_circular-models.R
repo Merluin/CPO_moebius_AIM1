@@ -18,6 +18,7 @@ library(brms)
 
 # Functions ---------------------------------------------------------------
 
+#usethis::use_description( check_name = FALSE)
 devtools::load_all()
 
 # Setup -------------------------------------------------------------------
@@ -72,6 +73,26 @@ fit_ri_int <- brm(form_ri_int,
                   seed = seed)
 
 success_step(fit_ri_int)
+
+# Model 1b - Emotion  * intensity ------------------------------------
+
+form_ri_3int <- bf(diff_theta ~ emotion *  intensity * Pt.sb + (1|id))
+
+fit_ri_3int <- brm(form_ri_3int,
+                  data = dat_fit,
+                  prior = prior_von_mises,
+                  family = von_mises(link = "tan_half"),
+                  chains = chains,
+                  cores = cores,
+                  iter = iter,
+                  sample_prior = samp_prior,
+                  file = file.path("models","theta","fit_ri_3int.rds"),
+                  save_pars = save_pars(all = TRUE),
+                  seed = seed,
+                  control=list(adapt_delta=0.99, 
+                               max_treedepth=13))
+
+success_step(fit_ri_3int)
 
 # Model 2 - Emotion + intensity ------------------------------------
 
