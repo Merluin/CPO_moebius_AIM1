@@ -74,6 +74,9 @@ fit_ri_int <- brm(form_ri_int,
 
 success_step(fit_ri_int)
 
+# summary(fit_ri_int)
+# m1<-emmeans(fit_ri_int, ~intensity|emotion )
+
 # Model 1b - Emotion  * intensity ------------------------------------
 prior_von_mises <- c(prior(normal(0, 2), class = "b", dpar = ""))
 
@@ -95,9 +98,14 @@ fit_ri_3int <- brm(form_ri_3int,
 
 success_step(fit_ri_3int)
 
-emtrends(fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
-summary(dataset_fit_ri_3int)
-emtrends(dataset_fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
+# summary(fit_ri_3int)
+m1<-emtrends(fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
+s1<-summary(m1)
+s1%>%
+  as.data.frame()%>%
+  flextable()%>% 
+  colformat_double(digits = 2) %>% 
+  theme_vanilla()
 
 
 # Model 2 - Emotion + intensity ------------------------------------
@@ -118,6 +126,11 @@ fit_ri_no2int <- brm(form_ri_no2int,
                   seed = seed)
 
 success_step(fit_ri_no2int)
+
+# summary(fit_ri_no2int)
+# emmeans(fit_ri_no2int, ~emotion)
+# emmeans(fit_ri_no2int, ~intensity)
+
 
 # Model 3 - (neutral faces) ------------------------------------------
 
@@ -147,6 +160,8 @@ fit_ri_neu <- brm(form_ri_neu,
                   seed = seed)
 
 success_step(fit_ri_neu)
+# summary(fit_ri_neu)
+# emmeans(fit_ri_no2int, ~emotion)
 
 #################################################
 # 

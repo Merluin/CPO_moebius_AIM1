@@ -15,7 +15,7 @@ rm(list=ls()) # remove all objects
 
 library(tidyverse)
 library(brms)
-
+library(emmeans)
 # Functions ---------------------------------------------------------------
 
 devtools::load_all()
@@ -25,7 +25,7 @@ devtools::load_all()
 seed <- 2022
 chains <- 15
 iter <- 4000
-cores <- chains
+cores <- 6
 samp_prior <- "yes"
 
 # Data --------------------------------------------------------------------
@@ -72,6 +72,38 @@ fit_ri_int <- brm(form_ri_int,
 
 success_step(fit_ri_int)
 
+# summary(fit_ri_int)
+# emmeans(fit_ri_int, ~intensity|emotion )
+
+# Model 1b - Emotion  * intensity * sunnybrook ------------------------------------
+
+prior_gaussian <- c(prior(normal(150, 100), class = "b", coef = "Intercept"))
+
+form_ri_3int <- bf(
+  int ~  0 + Intercept + emotion *  intensity * Pt.sb+ (1|id)
+)
+
+fit_ri_3int <- brm(form_ri_3int,
+                  data = dat_fit,
+                  prior = prior_gaussian,
+                  family = gaussian(),
+                  chains = chains,
+                  cores = cores,
+                  iter = iter,
+                  file = file.path("models","intensity","_fit_ri_int.rds"),
+                  save_pars = save_pars(all = TRUE),
+                  sample_prior = samp_prior,
+                  seed = seed,
+                  control=list(adapt_delta=0.99, 
+                               max_treedepth=13))
+
+success_step(fit_ri_3int)
+
+
+# emtrends(fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
+# summary(dataset_fit_ri_3int)
+# emtrends(dataset_fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
+
 # Model 2 - Emotion  + intensity ----------------------------------------
 
 form_ri_no2int <- bf(int ~ 0 + Intercept + emotion + intensity + (1|id))
@@ -90,7 +122,11 @@ fit_ri_no2int <- brm(form_ri_no2int,
 
 success_step(fit_ri_no2int)
 
-# Model 5 - mask (neutral faces) ------------------------------------------
+# summary(fit_ri_no2int)
+# emmeans(fit_ri_no2int, ~emotion)
+# emmeans(fit_ri_no2int, ~intensity)
+
+# Model 5 - (neutral faces) ------------------------------------------
 
 form_ri_neu <- bf(
   int ~  0 + Intercept +  (1|id)
@@ -113,6 +149,8 @@ fit_ri_neu <- brm(form_ri_neu,
                   seed = seed)
 
 success_step(fit_ri_neu)
+# summary(fit_ri_neu)
+# emmeans(fit_ri_no2int, ~emotion)
 
 #################################################
 # 
