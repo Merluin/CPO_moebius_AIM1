@@ -26,7 +26,7 @@ devtools::load_all()
 seed <- 2022
 chains <- 15
 iter <- 4000
-cores <- chains  
+cores <- 6  
 samp_prior <- "yes"
 
 # Data --------------------------------------------------------------------
@@ -75,6 +75,7 @@ fit_ri_int <- brm(form_ri_int,
 success_step(fit_ri_int)
 
 # Model 1b - Emotion  * intensity ------------------------------------
+prior_von_mises <- c(prior(normal(0, 2), class = "b", dpar = ""))
 
 form_ri_3int <- bf(diff_theta ~ emotion *  intensity * Pt.sb + (1|id))
 
@@ -93,6 +94,11 @@ fit_ri_3int <- brm(form_ri_3int,
                                max_treedepth=13))
 
 success_step(fit_ri_3int)
+
+emtrends(fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
+summary(dataset_fit_ri_3int)
+emtrends(dataset_fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")
+
 
 # Model 2 - Emotion + intensity ------------------------------------
 
