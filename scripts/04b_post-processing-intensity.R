@@ -42,13 +42,13 @@ fit_info <- lapply(fit_list, get_model_info)
 # fit_ri_int
 
 data_grid_fit_ri_int <- expand_grid(
-  emotion = unique(fit_list$dataset_fit_ri_int$data$emotion),
-  intensity = unique(fit_list$dataset_fit_ri_int$data$intensity)
+  emotion = unique(fit_list$fit_ri_int$data$emotion),
+  intensity = unique(fit_list$fit_ri_int$data$intensity)
 )
 
 # getting posterior predictions
 
-post_fit_ri_int <- epred_draws(fit_list$dataset_fit_ri_int, newdata = data_grid_fit_ri_int,
+post_fit_ri_int <- epred_draws(fit_list$fit_ri_int, newdata = data_grid_fit_ri_int,
                                re_formula = NA)
 
 post_fit_ri_int <- post_fit_ri_int %>% 
@@ -65,18 +65,11 @@ post_fit_ri_diff_int <- post_fit_ri_int %>%
 
 # Adding Information Criteria ---------------------------------------------
 
-fit_list$dataset_fit_ri_int <- add_criterion(fit_list$dataset_fit_ri_int, "loo")
-fit_list$dataset_fit_ri_no2int <- add_criterion(fit_list$dataset_fit_ri_no2int, "loo")
+fit_list$fit_ri_int <- add_criterion(fit_list$fit_ri_int, "loo")
 
-int_effect_weights <- model_weights(fit_list$dataset_fit_ri_int, fit_list$dataset_fit_ri_no2int)
-
-int_effect_loo_diff <- loo_compare(fit_list$dataset_fit_ri_int, fit_list$dataset_fit_ri_no2int)
 
 loo_list <- list(
-  fit_ri_int = fit_list$dataset_fit_ri_int$criteria$loo,
-  fit_ri_no3int = fit_list$dataset_fit_ri_no2int$criteria$loo,
-  weights = int_effect_weights,
-  diff = int_effect_loo_diff
+  fit_ri_int = fit_list$dataset_fit_ri_int$criteria$loo
 )
 
 # Saving ------------------------------------------------------------------

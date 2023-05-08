@@ -91,20 +91,28 @@ gew_legend <- emo_coords %>%
         panel.background = element_rect(fill = "white", color = NA)) +
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300))
 
+# dat_plot <- dat %>% 
+#   filter(Wheel.name == "GW1")%>%
+#   dplyr::select(Pt.code,Pt.group,Wheel.task,emotion, Video.intensity, x_cen, y_cen) %>% 
+#   mutate( intensity = stringr::str_to_title(Video.intensity),
+#          emotion = stringr::str_to_title(emotion),
+#          emotion = ifelse(emotion == "Neutrality", "Neutral", emotion),
+#          emotion = factor(emotion),
+#          emotion = forcats::fct_relevel(emotion, "Neutral"))
 dat_plot <- dat %>% 
-  select(Exp.group,Wheel.task,emotion,Wheel.name, Video.intensity, x_cen, y_cen) %>% 
+  dplyr::select(Pt.group,Wheel.task,emotion,Wheel.name, Video.intensity, x_cen, y_cen) %>% 
   mutate( intensity = stringr::str_to_title(Video.intensity),
-         emotion = stringr::str_to_title(emotion),
-         emotion = ifelse(emotion == "Neutrality", "Neutral", emotion),
-         emotion = factor(emotion),
-         emotion = forcats::fct_relevel(emotion, "Neutral"))
+          emotion = stringr::str_to_title(emotion),
+          emotion = ifelse(emotion == "Neutrality", "Neutral", emotion),
+          emotion = factor(emotion),
+          emotion = forcats::fct_relevel(emotion, "Neutral"))
 
 neutral_plot <- dat_plot %>% 
   filter(emotion == "Neutral") %>% 
   ggplot(aes(x = x_cen, y = y_cen)) +
   ggpubr::background_image(bg) +
-  geom_point(alpha = 0.5, aes(color = Wheel.name), show.legend = FALSE, size = 3) +
-  ggh4x::facet_nested(Wheel.name ~ emotion, switch="y") +
+  geom_point(alpha = 0.5, show.legend = FALSE, size = 3) +
+  ggh4x::facet_nested(Video.intensity ~ emotion, switch="y") +
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300)) +
   theme_minimal() +
   theme(axis.text.x = element_blank(),
@@ -115,17 +123,16 @@ neutral_plot <- dat_plot %>%
         strip.text.y = element_text(size = 20, face = "bold"),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "white", color = NA)) +
-  scale_color_manual(values = c("black", "black", "NA"))
+        panel.background = element_rect(fill = "white", color = NA))
 
 plot_gew_legend_neutral <- plot_grid(neutral_plot, gew_legend, labels = "AUTO")
 
 plot_gew_emotions <- dat_plot %>% 
   filter(emotion != "Neutral", Wheel.task == "task") %>% 
-  ggplot(aes(x = x_cen, y = y_cen)) +
+  ggplot(aes(x = x_cen, y = y_cen, color = intensity)) +
   ggpubr::background_image(bg) +
-  geom_point(alpha = 0.5, size = 2) +
-  ggh4x::facet_nested(Wheel.name + intensity ~ emotion) +
+  geom_point(alpha = 0.5, size = 1) +
+  ggh4x::facet_nested( Pt.group + Wheel.name  ~ emotion) +
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300)) +
   theme_minimal() +
   theme(axis.text.x = element_blank(),
@@ -287,7 +294,7 @@ plot_list <- make_named_list(plot_gew_legend_neutral,
                              plot_gew_emotions,
                              plot_gew_discrete,
                              plot_angle_intensity, 
-                             plot_kappa_intensity, 
+                             #plot_kappa_intensity, 
                              plot_int_intensity )
 
 saveRDS(plot_list, file = "objects/paper_plots.rds")

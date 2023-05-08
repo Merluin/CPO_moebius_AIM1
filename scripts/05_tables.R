@@ -129,14 +129,11 @@ tab_eda <- dat %>%
 
 tab_kappa_angle_intensity_effect <- circular_objects$tidy_post$post_fit_ri_diff_int %>% 
   group_by(emotion, .draw) %>% 
-  summarise(angle_full = mean(angle_full, na.rm = TRUE),
-            angle_subtle = mean(angle_subtle, na.rm = TRUE),
-            angle_diff = mean(angle_diff, na.rm = TRUE),
-            kappa_inv_full = mean(kappa_inv_full, na.rm = TRUE),
-            kappa_inv_subtle = mean(kappa_inv_subtle, na.rm = TRUE),
-            kappa_inv_ratio = mean(kappa_inv_ratio, na.rm = TRUE)) %>% 
+  summarise(angle_full = mean(full, na.rm = TRUE),
+            angle_subtle = mean(subtle, na.rm = TRUE),
+            angle_diff = mean(angle_diff, na.rm = TRUE)) %>% 
   ungroup() %>% 
-  select(emotion, angle_full, angle_subtle, angle_diff, kappa_inv_full, kappa_inv_subtle, kappa_inv_ratio, .draw) %>%
+  select(emotion, angle_full, angle_subtle, angle_diff, .draw) %>%
   na.omit()%>%
   pivot_longer(2:(ncol(.)-1), names_to = "param", values_to = "value") %>% 
   group_by(param) %>% 

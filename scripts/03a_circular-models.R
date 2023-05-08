@@ -15,6 +15,8 @@ rm(list=ls()) # remove all objects
 
 library(tidyverse)
 library(brms)
+library(emmeans)
+library(flextable)
 
 # Functions ---------------------------------------------------------------
 
@@ -77,7 +79,36 @@ success_step(fit_ri_int)
 # summary(fit_ri_int)
 # m1<-emmeans(fit_ri_int, ~intensity|emotion )
 
-# Model 1b - Emotion  * intensity ------------------------------------
+# Model 1a - Emotion  * intensity ------------------------------------
+prior_von_mises <- c(prior(normal(0, 2), class = "b", dpar = ""))
+
+form_ri_2int <- bf(diff_theta ~ emotion *  intensity  + (1|id))
+
+fit_ri_2int <- brm(form_ri_2int,
+                   data = dat_fit,
+                   prior = prior_von_mises,
+                   family = von_mises(link = "tan_half"),
+                   chains = chains,
+                   cores = cores,
+                   iter = iter,
+                   sample_prior = samp_prior,
+                   file = file.path("models","theta","fit_ri_2int.rds"),
+                   save_pars = save_pars(all = TRUE),
+                   seed = seed,
+                   control=list(adapt_delta=0.99, 
+                                max_treedepth=13))
+
+success_step(fit_ri_2int)
+summary(fit_ri_2int)
+m1<-emmeans(fit_ri_2int, pairwise ~intensity|emotion)
+s1<-m1$contrasts
+s1%>%
+  as.data.frame()%>%
+  flextable()%>% 
+  colformat_double(digits = 2) %>% 
+  theme_vanilla()
+
+# Model 1b - Emotion  * intensity * sunnybrook------------------------------------
 prior_von_mises <- c(prior(normal(0, 2), class = "b", dpar = ""))
 
 form_ri_3int <- bf(diff_theta ~ emotion *  intensity * Pt.sb + (1|id))
@@ -97,6 +128,14 @@ fit_ri_3int <- brm(form_ri_3int,
                                max_treedepth=13))
 
 success_step(fit_ri_3int)
+summary(fit_ri_3int)
+m1<-emtrends(fit_ri_3int, ~intensity|emotion, var = "Pt.sb")
+s1<-summary(m1)
+s1%>%
+  as.data.frame()%>%
+  flextable()%>% 
+  colformat_double(digits = 2) %>% 
+  theme_vanilla()
 
 # summary(fit_ri_3int)
 m1<-emtrends(fit_ri_3int, ~intensity|emotion ,var = "Pt.sb")

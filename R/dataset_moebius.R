@@ -16,56 +16,66 @@ dataset_moebius <- function(dataset_name)
   # find nb of file
   folder_dir<-file.path("original_data")
   
-  #concatenate all file
+  # Concatenate all file from Psychopy
+  # Files are .csv placed in "original_data" folder
   dataset<-list.files(path=folder_dir, full.names = TRUE,pattern='csv') %>%
     lapply(.,function(x) read.csv(x, sep=",", header=TRUE, stringsAsFactors = FALSE ))%>%
     lapply(clean_practice)%>%
     bind_rows()
   
   dataset<- dataset%>%
-    mutate(subject = as.numeric(as.factor(id)))%>%
-    group_by(id) %>% 
+    mutate(subject = ifelse(tolower(group) == "moebius",participant,participant+length(unique(participant))))%>%
+    group_by(subject) %>% 
     mutate(trial = 1:n()) %>% 
     ungroup()
   
-  info<-data.frame(subject = c(1:3), SB = c(12,17,9))
+  # Demographic Dataset from google sheet
+  # Files are .csv placed in "original_data/demography" folder
+  filedemo<-list.files("original_data/demography",pattern= 'Partecipanti') 
+  demo<- read.csv(file.path("original_data/demography",filedemo), sep=",", header=TRUE,stringsAsFactors = FALSE,na.strings= "aa")%>%
+    filter(group != "bell" & group != "")%>%
+    dplyr::select(-c(Nome,Cognome))
   
-  dataset<-left_join(dataset,info, by = "subject")
+  # combine Psychopy and Demographic datasets 
+  # ID.subject is used to combine datasets
+  id <- parse_number(demo$ID.subject)
+  demo$ID.subject <- sprintf("%s_%s", id, demo$group)
+  dataset2<-left_join(dataset,demo%>%dplyr::select(ID.subject,Sunnybrook), by = "ID.subject")
   
   
-Pct<-dataset%>%
+Pct<-dataset2%>%
   filter(loop_practice.thisRepN>=0)%>%
-    select("date","trial","id","subject","sex","education", "age","SB","group",
+  dplyr::select("ID.subject","date","trial","subject","sex","education", "age","Sunnybrook","group",
            "practice","primary.time","primary.x","primary.y",
            "file_duration", "file", "file_emotion_level", "file_gender",
            "file_emotion", "file_id")%>%
-    'colnames<-'(c("Exp.date","Exp.trial","Pt.Public.ID","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Exp.group",
+    'colnames<-'(c("ID.subject","Exp.date","Exp.trial","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Pt.group",
                    "Wheel.name", "Wheel.rt", "Wheel.x", "Wheel.y", "Wheel.task", 
                    "Video.name", "Video.intensity", "Video.gender", "Video.emotion", "Video.id"))%>%
     mutate(Wheel.name = "GW1" ,
            Wheel.task = "practice")
 
   
-Gw1<-dataset%>%
+Gw1<-dataset2%>%
   filter(exp_blocks.thisRepN >= 0)%>%
-  select("date","trial","id","subject","sex","education", "age","SB","group",
+  dplyr::select("ID.subject","date","trial","subject","sex","education", "age","Sunnybrook","group",
          "practice","primary.time","primary.x","primary.y",
          "file_duration", "file", "file_emotion_level", "file_gender",
          "file_emotion", "file_id")%>%
-    'colnames<-'(c("Exp.date","Exp.trial","Pt.Public.ID","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Exp.group",
+    'colnames<-'(c("ID.subject","Exp.date","Exp.trial","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Pt.group",
                    "Wheel.name", "Wheel.rt", "Wheel.x", "Wheel.y", "Wheel.task", 
                    "Video.name", "Video.intensity", "Video.gender", "Video.emotion", "Video.id"))%>%
     mutate(Wheel.name = "GW1",
            Wheel.task = "task")%>%
     drop_na(Video.id)
 
-Gw2<-dataset%>%
+Gw2<-dataset2%>%
   filter(exp_blocks.thisRepN >= 0)%>%
-  select("date","trial","id","subject","sex","education", "age","SB","group",
+  dplyr::select("ID.subject","date","trial","subject","sex","education", "age","Sunnybrook","group",
          "practice","secondary.time","secondary.x","secondary.y",
          "file_duration", "file", "file_emotion_level", "file_gender",
          "file_emotion", "file_id")%>%
-  'colnames<-'(c("Exp.date","Exp.trial","Pt.Public.ID","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Exp.group",
+  'colnames<-'(c("ID.subject","Exp.date","Exp.trial","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Pt.group",
                  "Wheel.name", "Wheel.rt", "Wheel.x", "Wheel.y", "Wheel.task", 
                  "Video.name", "Video.intensity", "Video.gender", "Video.emotion", "Video.id"))%>%
   mutate(Wheel.name = "GW2",
@@ -76,10 +86,10 @@ Gw2<-dataset%>%
 data <- rbind(Pct,Gw1, Gw2)%>%
     mutate(
            Exp.trial = as.numeric(Exp.trial),
-           Pt.Public.ID = as.factor(Pt.Public.ID),
            Pt.code = as.factor(Pt.code),
            Pt.gender = ifelse(Pt.gender == "f","Donna","Uomo"),
            Pt.gender = as.factor(Pt.gender),
+           Pt.group = as.factor(Pt.group),
            Pt.study = as.numeric(Pt.study),
            Pt.age = as.numeric(Pt.age),
            Wheel.name = as.factor(Wheel.name),
@@ -89,9 +99,6 @@ data <- rbind(Pct,Gw1, Gw2)%>%
            Wheel.rt = str_remove_all(Wheel.rt, "[\\[|\\] ']"),
            Wheel.x = as.numeric(Wheel.x),
            Wheel.y = as.numeric(Wheel.y),
-           # Wheel.x = case_when( Wheel.name == "GW1" ~ (Wheel.x + 256),
-           #                    Wheel.name == "practice" ~ (Wheel.x + 256),
-           #                    Wheel.name == "GW2" ~ (Wheel.x - 256)),
            Wheel.rt = as.numeric(Wheel.rt),
            Wheel.rt = round(Wheel.rt*1000,1),
            Wheel.rt = replace_na(Wheel.rt,19999),
@@ -109,8 +116,7 @@ data <- rbind(Pct,Gw1, Gw2)%>%
                       emotion == "happy"~"happiness",
                       emotion == "neutral"~"neutrality",
                       emotion == "sad"~"sadness",
-                      emotion == "surprised"~"surprise"),
-         Exp.group = "moebius")
+                      emotion == "surprised"~"surprise"))
 
   
 

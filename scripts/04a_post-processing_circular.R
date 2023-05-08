@@ -42,16 +42,15 @@ fit_info <- lapply(fit_list, get_model_info)
 # fit_ri_int
 
 data_grid_fit_ri_int <- expand_grid(
-  emotion = unique(fit_list$dataset_fit_ri_int$data$emotion),
-  intensity = unique(fit_list$dataset_fit_ri_int$data$intensity)
+  emotion = unique(fit_list$fit_ri_2int$data$emotion),
+  intensity = unique(fit_list$fit_ri_2int$data$intensity)
 )
 
 # getting posterior predictions. Here the inverse of the link functions are applied
 # tan-half for mu and exp for kappa
 
-post_fit_ri_int <- epred_draws(fit_list$dataset_fit_ri_int, newdata = data_grid_fit_ri_int,
-                               re_formula = NA,
-                               dpar = "kappa")
+post_fit_ri_int <- epred_draws(fit_list$fit_ri_2int, newdata = data_grid_fit_ri_int,
+                               re_formula = NA)
 
 # getting posterior in degrees. Given that is a linear transformation, results are
 # conceptually the same
@@ -59,35 +58,24 @@ post_fit_ri_int <- epred_draws(fit_list$dataset_fit_ri_int, newdata = data_grid_
 post_fit_ri_int$angle <- rad_to_deg(post_fit_ri_int$.epred)
 
 post_fit_ri_int <- post_fit_ri_int %>% 
-  rename("theta" = .epred) %>% 
-  mutate(kappa_inv = kappa_to_var(kappa)) # inverse of concentration
+  rename("theta" = .epred)
 
 # computing relevant posterior transformations
 
 post_fit_ri_diff_int <- post_fit_ri_int %>% 
   ungroup() %>% 
-  select( emotion, intensity, angle, kappa, kappa_inv, .draw) %>% 
-  pivot_wider(names_from = intensity, values_from = c(kappa, angle, kappa_inv)) %>% 
-  mutate(kappa_inv_ratio = kappa_inv_full/kappa_inv_subtle,
-         kappa_log_ratio_inv = log(kappa_inv_ratio),
-         kappa_ratio = kappa_full/kappa_subtle,
-         kappa_log_ratio = log(kappa_ratio),
-         angle_diff = angle_full - angle_subtle)
+  select( emotion, intensity, angle, .draw) %>% 
+  pivot_wider(names_from = intensity, values_from = c( angle)) %>% 
+  mutate(angle_diff = full - subtle)
 
 # Adding Information Criteria ---------------------------------------------
 
-fit_list$dataset_fit_ri_int <- add_criterion(fit_list$dataset_fit_ri_int, "loo", ndraws = 5000, force_save = TRUE)
-fit_list$dataset_fit_ri_no2int <- add_criterion(fit_list$dataset_fit_ri_no2int, "loo", ndraws = 5000, force_save = TRUE)
+fit_list$fit_ri_2int <- add_criterion(fit_list$fit_ri_2int, "loo", ndraws = 5000, force_save = TRUE)
 
-int_effect_weights <- model_weights(fit_list$dataset_fit_ri_int, fit_list$dataset_fit_ri_no2int, ndraws = 5000)
 
-int_effect_loo_diff <- loo_compare(fit_list$dataset_fit_ri_int, fit_list$dataset_fit_ri_no2int)
 
 loo_list <- list(
-  fit_ri_int = fit_list$dataset_fit_ri_int$criteria$loo,
-  fit_ri_no2int = fit_list$dataset_fit_ri_no2int$criteria$loo,
-  weights = int_effect_weights,
-  diff = int_effect_loo_diff
+  fit_ri_2int = fit_list$fit_ri_2int$criteria$loo
 )
 
 # Saving ------------------------------------------------------------------
