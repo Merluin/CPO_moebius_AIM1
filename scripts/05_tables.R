@@ -85,6 +85,22 @@ circular_objects <- readRDS(file.path("objects", "circular_objects.rds"))
 
 emo_order = c("Surprise", "Sadness", "Happiness", "Fear", "Disgust", "Anger")
 
+dat_fit <- readRDS(file = file.path("data",paste0(datasetname,"_fit.rds")))
+
+# Demographic Table ---------------------------------------------------------------
+demo<- dat_fit%>%
+  group_by(Pt.code) %>% 
+  mutate(Exp.trial = 1:n()) %>% 
+  ungroup()%>%
+  filter(Exp.trial==1)%>%
+  dplyr::select(contains("Pt"))%>%
+  mutate(Pt.gender = ifelse(Pt.gender == "Uomo","Male","Female"))%>%
+  'colnames<-'(c("Subject","Gender","Education" ,"age", "Sunnybrook","Group"))%>%
+  dplyr::select(Subject,Group,Gender,age,Education,Sunnybrook)%>%
+  flextable_with_param() %>% 
+  align(part = "header", align = "center") %>% 
+  align( part = "body", align = "center")
+
 # EDA Table ---------------------------------------------------------------
 
 # the mean is the angular mean in radians. the computation is the same as
@@ -95,14 +111,15 @@ emo_order = c("Surprise", "Sadness", "Happiness", "Fear", "Disgust", "Anger")
 # test: rad_to_deg(CircStats::circ.mean(dat$theta)) %% 360
 
 tab_eda <- dat %>% 
-  mutate(intensity = Video.intensity)%>%
-  group_by(emotion,  intensity) %>%
+  mutate(intensity = Video.intensity,
+         group = Pt.group)%>%
+  group_by(group, emotion,  intensity) %>%
   summarise(m_angle = rad_to_deg(CircStats::circ.mean(theta)) %% 360,
             var_angle = 1 - CircStats::circ.disp(theta)$var,
-            m_int = mean(int),
-            sd_int = sd(int)) %>% 
-  left_join(., emo_coords %>% dplyr::select(emotion, angle_emo), by = "emotion") %>% 
-  dplyr::select(emotion, angle_emo, everything()) %>% 
+            m_int = mean(magnitude),
+            sd_int = sd(magnitude)) %>% 
+  left_join(., emo_coords %>% dplyr::select(emotion, degree_emo), by = "emotion") %>% 
+  dplyr::select(emotion, degree_emo, group, everything()) %>% 
   clean_emotion_names(emotion) %>% 
   mutate(emotion = factor(emotion)) %>% 
   arrange(emotion) %>% 
@@ -119,16 +136,23 @@ tab_eda <- dat %>%
     m_int = "Mean",
     sd_int = "SD"
   )) %>% 
-  add_header_row(values = c( "", "", "",
+  add_header_row(values = c( "","", "", "",
                             rep(c("Angle", "Perceived Intensity"), each = 2))) %>% 
   merge_v(j = c(1:3)) %>% 
   merge_h(part = "header") %>% 
   align(align = "center", part = "all")
 
-# Angle/Theta Full vs Subtle ----------------------------------------------
+# Angle/kappa Full vs Subtle ----------------------------------------------
 
-tab_kappa_angle_intensity_effect <- circular_objects$tidy_post$post_fit_ri_diff_int %>% 
-  group_by(emotion, .draw) %>% 
+tab_kappa_angle_intensity_effect <- dat %>% 
+  mutate(intensity = Video.intensity,
+         group = Pt.group)%>%
+  group_by(group, emotion,  intensity) %>%
+  summarise(m_angle = rad_to_deg(CircStats::circ.mean(theta)) %% 360,
+            var_angle = 1 - CircStats::circ.disp(theta)$var,
+            m_int = mean(magnitude),
+            sd_int = sd(magnitude)) %>%
+  
   summarise(angle_full = mean(full, na.rm = TRUE),
             angle_subtle = mean(subtle, na.rm = TRUE),
             angle_diff = mean(angle_diff, na.rm = TRUE)) %>% 
@@ -161,20 +185,31 @@ tab_kappa_angle_intensity_effect <- circular_objects$tidy_post$post_fit_ri_diff_
     main_param = "Parameter"))
 
 # Int full vs subtle ------------------------------------------------------
+CircularMean <- dat_fit%>%
+  mutate(correct = ifelse(emotion == resp_emotion_label, 1,0),
+         correct = as.factor(correct),
+         circulardiff = circular(diff, units = "degrees" ))%>%
+  dplyr::select(id,circulardiff,magnitude,intensity,emotion,Pt.group,correct)%>%
+  'colnames<-'(c("subject","degree","magnitude" ,"intensity", "emotion","group","correct"))%>%
+  drop_na(degree)%>%
+  group_by(subject,group,emotion,intensity)%>%
+  summarise(circular_mean = mean.circular(degree),
+            rho_mean = rho.circular(degree),
+            mag_mean = mean(magnitude))
 
-tab_int_intensity_effect <- intensity_objects$tidy_post$post_fit_ri_int %>% 
-  group_by(emotion, intensity, .draw) %>% 
-  summarise(int = mean(int)) %>% 
-  pivot_wider(names_from = intensity, values_from = int) %>% 
+tab_int_intensity_effect <- CircularMean %>% 
+  group_by(group, emotion, intensity) %>% 
+  summarise(mag_mean = mean(mag_mean)) %>% 
+  pivot_wider(names_from = intensity, values_from = mag_mean) %>% 
   mutate(int_diff = full - subtle) %>% 
-  select(emotion, full, subtle, int_diff, .draw) %>% 
-  pivot_longer(2:(ncol(.) - 1), names_to = "param", values_to = "value") %>% 
-  group_by(param) %>% 
+  select(group, emotion, full, subtle, int_diff) %>% 
+  pivot_longer(3:(ncol(.) - 1), names_to = "param", values_to = "value") %>% 
+  group_by(group, param) %>% 
   nest() %>% 
   mutate(null = 0,
          summary = map(data, get_post_summary, emotion, TRUE)) %>% 
   unnest(summary) %>% 
-  select(param, emotion, value_chr) %>% 
+  select(param, emotion,group, value_chr) %>% 
   mutate(param = case_when(grepl("full", param) ~ "Intensity~full~",
                            grepl("subtle", param) ~ "Intensity~subtle~",
                            TRUE ~ "Contrast"),
@@ -186,7 +221,7 @@ tab_int_intensity_effect <- intensity_objects$tidy_post$post_fit_ri_int %>%
   flextable_with_param() %>% 
   align(part = "header", align = "center") %>% 
   align(j = 2, part = "body", align = "center") %>% 
-  merge_v(2) %>% 
+  merge_v(1) %>% 
   set_header_labels(values = list(
     emotion = "Emotion"
   ))
@@ -196,7 +231,7 @@ tab_int_intensity_effect <- intensity_objects$tidy_post$post_fit_ri_int %>%
 tab_acc_gew <- dat %>% 
     filter(emotion != "neutrality") %>% 
     mutate(acc = ifelse(emotion == resp_emotion_label, 1, 0)) %>%
-    group_by(emotion, intensity) %>% 
+    group_by(Pt.group,emotion, intensity) %>% 
     summarise(acc = mean(acc)) %>% 
     clean_emotion_names(emotion) %>% 
     set_emotion_order(emotion, emo_order, FALSE) %>% 
@@ -214,7 +249,7 @@ tab_acc_gew <- dat %>%
 # Saving ------------------------------------------------------------------
 
 tab_list <- make_named_list(tab_eda, tab_kappa_angle_intensity_effect, tab_int_intensity_effect,
-                            tab_acc_gew)
+                            tab_acc_gew, demo)
 
 tab_files <- paste0(names(tab_list), ".docx")
 

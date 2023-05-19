@@ -30,12 +30,14 @@ load(file.path("data", paste0(datasetname,".rds")))
 dat <- data %>% 
   mutate(x_cen = Wheel.x,
          y_cen = Wheel.y,
-         int = calc_dist(point_x = x_cen, point_y = y_cen),
+         magnitude = calc_dist(point_x = x_cen, point_y = y_cen),
          x_cen = ifelse(x_cen == 0, x_cen + 0.0001, x_cen),
          y_cen = ifelse(y_cen == 0, y_cen + 0.0001, y_cen),
          theta = atan(y_cen/x_cen),
          theta = correct_angle(theta, x_cen, y_cen), # correcting for quadrant
-         angle = rad_to_deg(theta)) # convert to degrees
+         degree = rad_to_deg(theta)) # convert to degrees
+
+
 
 # Here we create a dataframe with the "correct" value for each emotion. In this way
 # we can calculate the difference between the pressed angle and the correct one
@@ -51,15 +53,15 @@ coords <- coords %>%
          theta_emo = theta_emo + deg_to_rad((360/nrow(.))/2), # adding the shift for centering emotions
          x_emo = 300 * cos(theta_emo),
          y_emo = 300 * sin(theta_emo),
-         angle_emo = rad_to_deg(theta_emo))
+         degree_emo = rad_to_deg(theta_emo))
 
 # Here we calculate the angular difference between the correct and the pressed angle
 
-names(coords$angle_emo) <- coords$emotion # renaming for expanding
+names(coords$degree_emo) <- coords$emotion # renaming for expanding
 
 dat <- dat %>% 
-  mutate(emotion_angle = coords$angle_emo[.$emotion], # expanding the coords
-         diff = ang_diff(emotion_angle, angle))
+  mutate(emotion_angle = coords$degree_emo[.$emotion], # expanding the coords
+         diff = ang_diff(emotion_angle, degree))
 
 # combining the coords with the dat
 
@@ -73,8 +75,8 @@ coords$emo_order <- coords$emotion[coords$order]
 # Adding label to emotion/intensity ---------------------------------------
 
 dat<- dat%>% 
-  mutate(resp_emotion_label = seg_position(round(angle, 1)),
-         resp_intensity_label = level_int_position(int),
+  mutate(resp_emotion_label = seg_position(round(degree, 1)),
+         resp_intensity_label = level_int_position(magnitude),
          resp_intensity_ord = parse_number(resp_intensity_label))
 
 # Saving ------------------------------------------------------------------
@@ -86,4 +88,4 @@ saveRDS(coords, file = file.path("objects", "emo_coords.rds"))
 # 
 # END
 #
-#################################################
+#################################################a

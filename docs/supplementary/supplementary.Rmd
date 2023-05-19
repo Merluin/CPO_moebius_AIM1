@@ -21,6 +21,7 @@ header-includes:
   - \newcommand{\blandscape}{\begin{landscape}}
   - \newcommand{\elandscape}{\end{landscape}}
   - \usepackage[nottoc]{tocbibind}
+
 ---
 
 ```{r setup, include=FALSE, cache=FALSE}
@@ -41,6 +42,10 @@ library(dplyr)
 library(kableExtra)
 library(flextable)
 library(ggplot2)
+library(sjPlot)
+library(XML)
+library(rlist)
+library(janitor)
 ```
 
 ```{r data}
@@ -105,16 +110,10 @@ Bias = ((ideal - pressed) + 180) \mod 360 - 180
 (\#eq:ang-diff)
 \end{equation}
 
-This new measure (*bias*) has several advantages. Despite each emotion have a different location within the wheel, each response is now expressed in a position-free metric. The *bias* is centered on 0 if there is no response tendency away from the *ideal* value. Otherwise, a systematic shift would move the circular mean away from 0, clockwise (positive values) or anticlockwise (negative values). Other than the circular mean, also the spread on the circle (i.e., *uncertainty*) is an important performance measure. The *bias* and the *uncertainty* are can be considered independent measures.
+This new measure (*bias*) has several advantages. Despite each emotion have a different location within the wheel, each response is now expressed in a position-free metric. The *bias* is centered on 0 if there is no response tendency away from the *ideal* value. Otherwise, a systematic shift would move the circular mean away from 0, clockwise (positive values) or anticlockwise (negative values). In circular statistics, *bias* is also called *angular error* and is deffined as the difference between a reference angle and the subject's response. Other than the circular mean, also the spread on the circle (i.e., *uncertainty* or resultant length) is an important performance measure. The *bias* and the *uncertainty* can be considered independent measures. The circular variance ranges between 0 (no *uncertainty*) to 1 (maximum *uncertainty*) and is defined as 1- mean resultant length. 
 
-Given the periodicity of circular data, we cannot use standard statistical modeling tools [@Cremers2018-gr; @Cremers2018-in]. There are different ways to model circular data [see @Cremers2018-gr for an overview]. We decided to use a generalized linear mixed-effect model using the *von Mises* likelihood function. The *von Mises* distribution is an alternative to the Gaussian distribution for circular data, bounded in the range $[-\pi, \pi]$. The two parameters of the von Mises distribution, $\mu$ and $k$^[In fact, k is a concentration parameter that can be conceptually considered as the inverse of the standard deviation. When the concentration is 0 the distribution is *uniform*] representing our *bias* and *uncertainty* parameters. To facilitate the interpretation of models' parameters, we transformed $k$ into the circular variance using Equation \@ref(eq:bessel).
+Given the periodicity of circular data, we cannot use standard statistical modeling tools [@Cremers2018-gr; @Cremers2018-in]. There are different ways to model circular data [see @Cremers2018-gr for an overview]. 
 
-\begin{equation}
-\sigma^2 = 1 - \frac{I_1(k)}{I_0(k)}
-(\#eq:bessel)
-\end{equation}
-
-The circular variance ranges between 0 (no *uncertainty*) to 1 (maximum *uncertainty*). The transformation is computed using the modified Bessel function $I_i(k)$ of order $i$ [@Evans2011-mf].
 
 ## Perceived Intensity
 
@@ -127,15 +126,12 @@ I_{ij} = \sqrt{x^2 + y^2}
 
 ## Statistical models
 
-For the response angle (i.e., *bias* and *uncertainty*) we decided to use a *scale-location* mixed-effect model [@Burkner2018-vz; @Rigby2005-jq]. Under this framework, all parameters of a distribution can be predicted. In particular, we are predicting the *circular mean* (i.e., *bias*) and the *concentration* (i.e., *uncertainty*) Von Mises parameters as a function of Intensity (full and subtle) and Emotion (anger, happiness, disgust, fear, surprise and sadness). For the perceived intensity, we used a regular general linear mixed-effect model.
+For the response angle (i.e., *bias* and *uncertainty*) we decided to use a generalized linear mixed-effect model using bpnreg R package (v2.0.2; Jolien and Cremers 2021). It is based on the 'embedding' approach to circular modelling and makes use of the projected normal distribution. Its estimation method is a Bayesian MCMC sampler. Further technical details can be found in Cremers, Mulder & Klugkist (2018) and Cremers & Klugkist (2018).
 
-We estimated both models under a Bayesian framework the R software [@r-lang] using the Brms package [@Burkner2017-di] based on the STAN probabilistic programming language [@Carpenter2017-kf]. The Bayesian statistics consist in combining information from prior knowledge (i.e. *priors*) and the data (i.e., *likelihood*) to obtain the *posterior* distribution [@Kruschke2018-sm].
 
-In terms of contrast coding, for categorical predictors, we used `sum contrasts` using the `contr.sum()` function. 
+### `bpnme`
 
-### `brms`
-
-We fitted our models using the `brms` package. According to different models the `brm` setup could be different in terms of `backend`, number of `iterations` and `chains` and the parallelization approach. The general approach for `bias/uncertainty` models is the following:
+We fitted our models using the `bpnreg` package. According to different models the `bpnme` setup could be different in terms of `backend`, number of `iterations` and `chains` and the parallelization approach. The general approach for `bias/uncertainty` models is the following:
 
 ```{r circular-brms, eval = FALSE, echo = TRUE}
 
@@ -143,23 +139,19 @@ We fitted our models using the `brms` package. According to different models the
 form <- bf(theta_cen ~ ... + (1|id), 
            kappa ~ ... + (1|id))
 
-brm(formula, # model formula
-    data = data,
-    prior = priors,
-    family = von_mises(link = "tan_half", link_kappa = "log"),
-    chains = 15,
-    cores = 15,
-    iter = 4000,
-    sample_prior = "yes",
-    save_pars = save_pars(all = TRUE),
-    seed = 2022)
+bpnreg(formula, # model formula
+       data = dat_neutral,
+       its = iter,
+       burn = burns,
+       n.lag = n.lags,
+       seed = seeds)
 ```
 
 For the `perceived intensity`
 
 ```{r perceived-intensity-brms, eval = FALSE, echo = TRUE}
 
-brm(int ~ ... + (1|id),
+lmer(int ~ ... + (1|id),
     data = data,
     prior = priors,
     family = gaussian(),
@@ -169,27 +161,6 @@ brm(int ~ ... + (1|id),
     save_pars = save_pars(all = TRUE),
     sample_prior = "yes",
     seed = 2022)
-```
-
-When fitting models with uninformative or flat priors, we used a different chains/iteration approach to improve model fitting (especially for the Von Mises model). In particular we used the *within-chains* parallelization (https://cran.r-project.org/web/packages/brms/vignettes/brms_threading.html) for `bias/uncertainty` models:
-
-```{r circular-brms-un, eval = FALSE, echo = TRUE}
-
-# the scale-location specification
-form <- bf(theta_cen ~ ... + (1|id), 
-           kappa ~ ... + (1|id))
-
-brm(form,
-    data = data,
-    family = von_mises(link = "tan_half", link_kappa = "log"),
-    chains = 4,
-    prior = priors, # uninformative or flat
-    cores = 4,
-    iter = 10000,
-    sample_prior = "yes",
-    threads = threading(6),  # within-chains parallellization
-    save_pars = save_pars(all = TRUE),
-    seed = seed)
 ```
 
 For the `perceived intensity` models we use the same approach as the main models given the simpler fitting process.
@@ -205,14 +176,14 @@ bg <- magick::image_modulate(bg, brightness = 80)
 
 gew_legend <- emo_coords %>%   
   mutate(mask = "Legend",
-         flip = ifelse(x_emo < 0, angle_emo + 180, angle_emo),
+         flip = ifelse(x_emo < 0, degree_emo + 180, degree_emo),
          emotion = stringr::str_to_title(emotion)) %>% 
   ggplot() +
   ggpubr::background_image(bg) +
   geom_text(aes(x = x_emo*0.75, y = y_emo*0.75, 
                 label = emotion, 
                 angle = flip),
-            size = 5, fontface = "bold",
+            size = 6, fontface = "bold",
             check_overlap = TRUE) +
   facet_grid(. ~ mask) +
   theme_minimal() +
@@ -229,19 +200,19 @@ gew_legend <- emo_coords %>%
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300))
 
 dat_plot <- dat %>% 
-  select(Exp.group,Wheel.task,emotion,Wheel.name, Video.intensity, x_cen, y_cen) %>% 
+  dplyr::select(Pt.group,Wheel.task,emotion,Wheel.name, Video.intensity, x_cen, y_cen) %>% 
   mutate( intensity = stringr::str_to_title(Video.intensity),
-         emotion = stringr::str_to_title(emotion),
-         emotion = ifelse(emotion == "Neutrality", "Neutral", emotion),
-         emotion = factor(emotion),
-         emotion = forcats::fct_relevel(emotion, "Neutral"))
+          emotion = stringr::str_to_title(emotion),
+          emotion = ifelse(emotion == "Neutrality", "Neutral", emotion),
+          emotion = factor(emotion),
+          emotion = forcats::fct_relevel(emotion, "Neutral"))
 
 neutral_plot <- dat_plot %>% 
   filter(emotion == "Neutral") %>% 
   ggplot(aes(x = x_cen, y = y_cen)) +
   ggpubr::background_image(bg) +
-  geom_point(alpha = 0.5, aes(color = Wheel.name), show.legend = FALSE, size = 3) +
-  ggh4x::facet_nested(Wheel.name ~ intensity, switch="y") +
+  geom_point(alpha = 0.5, show.legend = FALSE, size = 3) +
+  ggh4x::facet_nested(Video.intensity ~ emotion, switch="y") +
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300)) +
   theme_minimal() +
   theme(axis.text.x = element_blank(),
@@ -252,8 +223,7 @@ neutral_plot <- dat_plot %>%
         strip.text.y = element_text(size = 20, face = "bold"),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "white", color = NA)) +
-  scale_color_manual(values = c("black", "black", "NA"))
+        panel.background = element_rect(fill = "white", color = NA))
 
 cowplot::plot_grid(neutral_plot, gew_legend, labels = "AUTO")
 ```
@@ -269,36 +239,18 @@ plots$plot_gew_emotions
 
 # Fitted Models{#fitted-models}
 
-Table \@ref(tab:tab-info-models) depicts all fitted models with main parameters. To read the table:
-
-- `fit_ri_int`: the random-intercept two-way interaction model for *bias*/*uncertainty* and *perceived intensity*
-- `fit_ri_no2int`: the random-intercept model without the two-way interaction *bias*/*uncertainty* and *perceived intensity*
-- `fit_*un/flat`: models with completely uninformative or flat priors
+Table \@ref(tab:tab-info-models) depicts all fitted models with comparison criteria for *bias* and *uncertainty*. 
+We performed model selection for our analysis of circular data using three criteria: the log pointwise predictive density (lppd) [1], the deviance information criterion (DIC) [2], and the Watanabe-Akaike information criterion (WAIC) [3]. These criteria enable us to evaluate the goodness of fit and model complexity, facilitating the selection of the most suitable model.
 
 \blandscape
 
 ```{r tab-info-models}
-circ_info <- lapply(circular$fit_info, create_info_tab) %>% 
-  bind_rows(.id = "name") %>% 
-  select(model, name, starts_with("fitting"))
+fit <- readRDS(here("models","theta","modelcomparison_theta.rds"))
 
-int_info <- lapply(intensity$fit_info, create_info_tab) %>% 
-  bind_rows(.id = "name") %>% 
-  select(model, name, starts_with("fitting"))
-
-mod_info <- bind_rows(circ_info, int_info)
-
-names(mod_info) <- stringr::str_replace_all(names(mod_info), "fitting.", "")
-
-mod_info %>% 
-  mutate(model = stringr::str_replace_all(model, "diff_theta", "diff_theta"),
-         model = stringr::str_replace_all(model, "kappa", "kappa"),
-         model = stringr::str_replace_all(model, "int", "int")) %>% 
-  qtab(max_width = 25) %>% 
-  fontsize(size = 10) %>% 
-  width(j = 1, 4) %>% 
-  align(j = 2:6, align = "center", part = "all") %>% 
-  set_caption(caption = captions[get_chunk_label()])
+fit %>%
+    flextable() %>% 
+    colformat_double(digits = 2) %>% 
+    autofit() 
 ```
 
 \elandscape
@@ -306,60 +258,63 @@ mod_info %>%
 In the next section we presented all fitted models using the same approach:
 
 - the model name (the same name as the R object)
-- prior distributions for each parameter
 - model output
-
-For the prior tables:
-
-- `prior`: is the prior distribution with parameters. All parameters without a proper prior (i.e., different from a flat prior) are not reported in the table.
-- `class`: is the type of parameter (`b` is for $\beta$ and `sd` for a standard deviation parameter e.g., by-subject intercept or residual $\sigma$)
-- `coef`: is the specific model parameters. If a prior is defined only for a *class*, then all parameters of that class will have the same prior
-- `dpar`: is for *distributional parameters*. In the case of the von Mises model refers to $k$ coefficients
-
-For the model tables:
-
-- `param`: is the model parameter name
-- `estimate`: is the mean of the posterior distribution
-- `Est.Error`: is the standard error of the posterior distribution
-- `95% CI`: is the 95% credible interval
-- `Rhat`: is the Gelman and Rubin [@Gelman1992-nb] convergence index. When is below 1.1 the parameters has converged.
-- `Bulk/Tail Effective Sample Size`: can be considered as the amount of information used for estimating a parameter. In general higher is better (see https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html). Is calculated from the number of iterations and chains of the models.
 
 \newpage
 
-## Bias/Uncertainty
+## Bias
 
 ```{r circular-tables, results='asis'}
-for(i in 1:length(circular$tidy_fit)){
-  
-  if(!grepl("flat|un", names(circular$tidy_fit)[i])){
+
+bias<-readRDS(here("models","theta","CircularMean.fit6.rds"))
+
+
+    # selected models
+    cat(paste("###", paste0("Model6; theta ~ ", as.character(bias$mm$pred.I[3])), "\n"))
+
     
-    # Title
-    cat(paste("###", names(circular$tidy_fit)[i]), "\n")
-    
-    # Model
-    mod_info[mod_info$name == names(circular$tidy_fit)[i], ] %>% 
-      qtab() %>% 
-      width(j = 1, 2)
-    
-    # Priors
-    cat(paste("####", "Priors", "\n"))
-    circular$priors[[i]] %>% 
-      tidy_prior() %>% 
+    # Fixed Effects
+    cat(paste("####", "Fixed Effects", "\n"))
+    bias$lin.coef.I %>%
+      data.frame() %>% 
       qtab() %>% 
       set_caption(caption = "") %>% 
       flextable_to_rmd()
     
-    # Models
+    # Circular Coefficients
     cat(paste("####", "Model", "\n"))
-    circular$tidy_fit[[i]] %>% 
+    bias$circ.coef %>% 
+      data.frame() %>% 
+      dplyr::select(contains("SAM"))%>%
       qtab() %>% 
       colformat_double(digits = 5) %>% 
       set_caption("") %>% 
       flextable_to_rmd()
     newpage()
-  }
-}
+
+```
+
+## Uncertainty
+
+```{r circular-tables_uncertainty, results='asis'}
+bias<-readRDS(here("models","theta","Rho_Mean.fit6.rds"))
+sum<-summary(bias, show.df = TRUE)
+
+    # selected models
+    cat(paste("###","Model6; kappa ~ emotion + intensity + group + (1|subject)", "\n"))
+
+    x<-tab_model(bias, file = "temp.html")
+    readHTMLTable(here("docs","supplementary","temp.html"))
+    
+    
+tables <- list.clean(readHTMLTable(here("docs","supplementary","temp.html")), fun = is.null, recursive = FALSE)
+tables2 = tables[[1]] %>% janitor::row_to_names(row_number = 1)
+tables2 <- as.matrix(tables2) %>% as_tibble()
+tables2[is.na(tables2)] <- ""
+
+knitr::kable(tables2, format = "pipe")
+
+
 ```
 
 \newpage
@@ -367,31 +322,22 @@ for(i in 1:length(circular$tidy_fit)){
 ## Perceived intensity
 
 ```{r intensity-tables, results='asis'}
-for(i in 1:length(intensity$tidy_fit)){
-  
-  if(!grepl("flat|un", names(intensity$tidy_fit)[i])){
+bias<-readRDS(here("models","intensity","magnitude_mean.fit6.rds"))
+sum<-summary(bias, show.df = TRUE)
+
+    # selected models
+    cat(paste("###","Model6; magnitude ~ emotion * intensity * group * correct + (1|subject)", "\n"))
+
+     x<-tab_model(bias, file = "temp.html")
+    readHTMLTable(here("docs","supplementary","temp.html"))
     
-    # Title
-    cat(paste("###", names(intensity$tidy_fit)[i]), "\n")
-  
-    # Priors
-    cat(paste("####", "Priors", "\n"))
-    intensity$priors[[i]] %>% 
-      tidy_prior() %>% 
-      qtab() %>% 
-      set_caption("") %>% 
-      flextable_to_rmd()
-  
-    # Models
-    cat(paste("####", "Model", "\n"))
-    intensity$tidy_fit[[i]] %>% 
-      qtab() %>% 
-      colformat_double(digits = 5) %>% 
-      set_caption("") %>% 
-      flextable_to_rmd()
-    newpage()
-  }
-}
+    
+tables <- list.clean(readHTMLTable(here("docs","supplementary","temp.html")), fun = is.null, recursive = FALSE)
+tables2 = tables[[1]] %>% janitor::row_to_names(row_number = 1)
+tables2 <- as.matrix(tables2) %>% as_tibble()
+tables2[is.na(tables2)] <- ""
+
+knitr::kable(tables2, format = "pipe")
 ```
 
 # Suggestions for meta-analysis
@@ -411,3 +357,5 @@ For the *uncertainty* it is possible to use directly the values from the posteri
 For the perceived intensity it is possible to use a standard Cohen's $d$ measure. The only general caveat about calculating a Cohen's $d$ with multilevel models concerns which standard deviation(s) to use [@Brysbaert2018-wp; @Westfall2014-im]
 
 # References
+
+\end{document}

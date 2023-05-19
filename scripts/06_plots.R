@@ -60,7 +60,7 @@ intensity_objects <- readRDS(file.path("objects", "intensity_objects.rds"))
 circular_objects <- readRDS(file.path("objects", "circular_objects.rds"))
 emo_coords <- readRDS(file.path("objects", "emo_coords.rds"))
 dat <- readRDS(file.path("data",paste0(datasetname,"_valid.rds")))
-
+dat_fit <- readRDS(file = file.path("data",paste0(datasetname,"_fit.rds")))
 # EDA Plots ---------------------------------------------------------------
 
 bg <- magick::image_read("files/gew_low_res.png")
@@ -68,7 +68,7 @@ bg <- magick::image_modulate(bg, brightness = 80)
 
 gew_legend <- emo_coords %>%   
   mutate(mask = "Legend",
-         flip = ifelse(x_emo < 0, angle_emo + 180, angle_emo),
+         flip = ifelse(x_emo < 0, degree_emo + 180, degree_emo),
          emotion = stringr::str_to_title(emotion)) %>% 
   ggplot() +
   ggpubr::background_image(bg) +
@@ -123,7 +123,8 @@ neutral_plot <- dat_plot %>%
         strip.text.y = element_text(size = 20, face = "bold"),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "white", color = NA))
+        panel.background = element_rect(fill = "white", color = NA))+
+  facet_grid(Pt.group ~ Wheel.name)
 
 plot_gew_legend_neutral <- plot_grid(neutral_plot, gew_legend, labels = "AUTO")
 
@@ -168,91 +169,128 @@ plot_gew_emotions <- dat_plot %>%
 #   scale_fill_manual(values = c("NA", "white"))
 
 # Plot Angle subtle vs full ----------------------------------------------
+CircularMean <- dat_fit%>%
+  mutate(circulardiff = circular(diff, units = "degrees" ))%>%
+  dplyr::select(id,circulardiff,video_set,emotion,Pt.group)%>%
+  'colnames<-'(c("subject","degree" ,"video_set", "emotion","group"))%>%
+  drop_na(degree)
 
-plot_angle_intensity_a<- circular_objects$tidy_post$post_fit_ri_int %>% 
+plot_angle_a<- CircularMean %>% 
   mutate(emotion = as.character(emotion)) %>% 
-  clean_emotion_names(emotion) %>% 
-  group_by(emotion, intensity, .draw) %>% 
-  summarise(angle = mean(angle)) %>% 
-  ggplot(aes(x = angle, y = emotion, fill = intensity)) +
-  geom_vline(xintercept = 0, linetype = "dashed", size = 0.5) +
-  stat_halfeye(alpha = 0.8, size = 3) +
+  clean_emotion_names(emotion) %>%
+  group_by(subject,group,emotion,video_set) %>%
+  summarise(circular_mean = mean.circular(degree)) %>% 
+  ggplot(aes(x = circular_mean, y = emotion, fill = group, color = video_set, shape = video_set )) +
+  geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.5) +
+  stat_halfeye(alpha = 0.8, size = 2) +
+  facet_grid(video_set ~ . ) +
   theme_paper() +
   theme(axis.title.y = element_blank(),
-        legend.position = c(0.9, 0.15)) +
+        legend.position = c(0.8, 0.15)) +
   xlab("Bias") +
-  labs(fill = "Intensity") 
+  labs(fill = "Group",
+       shape = "video_set") 
 
-plot_angle_intensity_b <- circular_objects$tidy_post$post_fit_ri_diff_int %>% 
-  group_by(emotion, .draw) %>% 
-  summarise(angle_diff = mean(angle_diff)) %>% 
-  ggplot(aes(x = angle_diff, y = emotion)) +
+
+plot_angle_b <- CircularMean %>% 
+  clean_emotion_names(emotion) %>%
+  group_by(subject,emotion, video_set) %>%
+  summarise(circular_mean = mean.circular(degree)) %>% 
+  ggplot(aes(x = circular_mean, y = emotion, shape = video_set)) +
   geom_vline(xintercept = 0, linetype = "dashed", size = 0.5) +
-  stat_halfeye(size = 3) +
+  stat_halfeye(size = 1) +
+  facet_grid(video_set ~ . ) +
   theme_paper() +
   theme(axis.title.y = element_blank(),
-        axis.text.y = element_blank()) +
-  xlab(latex2exp::TeX("$\\Delta_{intensity}$ Bias$"))
+        axis.text.y = element_blank(),
+        legend.position="none") +
+  xlab(latex2exp::TeX("$\\Delta_{group}$ Bias$"))
 
-plot_angle_intensity <- plot_grid(plot_angle_intensity_a, plot_angle_intensity_b, 
+plot_mean <- plot_grid(plot_angle_a, plot_angle_b, 
                             labels = "AUTO", rel_widths = c(3, 2), align = "hv")
 
-# Plot Kappa subtle vs full ----------------------------------------------
+# Plot Rho subtle vs full ----------------------------------------------
+kappa_mean <- dat_fit%>%
+  dplyr::select(id,degree,video_set,emotion,Pt.group)%>%
+  'colnames<-'(c("subject","degree","video_set", "emotion","group"))%>%
+  drop_na(degree)%>%
+  group_by(subject,group,emotion,video_set)%>%
+  summarise(kappa_mean = rho.circular(degree),
+            log_rho = log(kappa_mean))
 
-plot_kappa_intensity_a <- circular_objects$tidy_post$post_fit_ri_int %>% 
+plot_Rho_a<- kappa_mean %>% 
   mutate(emotion = as.character(emotion)) %>% 
-  clean_emotion_names(emotion) %>% 
-  group_by(emotion, intensity, .draw) %>% 
-  summarise(kappa_inv = mean(kappa_inv)) %>% 
-  ggplot(aes(x = log(kappa_inv), y = emotion)) +
-  stat_halfeye(aes(fill = intensity),
-               alpha = 0.8, size = 3) +
-  theme_minimal(base_size = 15) +
+  clean_emotion_names(emotion) %>%
+  group_by(subject,emotion,group,video_set) %>%
+  summarise(variance = 1-kappa_mean) %>% 
+  ggplot(aes(x = variance, y = emotion, fill = video_set, shape = group )) +
+  geom_vline(xintercept = 0.5, linetype = "dashed", linewidth = 0.5) +
+  stat_halfeye( size = 1) +
+  facet_grid(group ~ . ) +
   theme_paper() +
   theme(axis.title.y = element_blank(),
-        legend.position = c(0.90, 0.2)) +
-  xlab("Uncertainty")
+        legend.position = c(0.8, 0.15)) +
+  xlab("Uncertainty") +
+  labs(fill = "Group",
+       shape = "video_set") 
 
-plot_kappa_intensity_b <- circular_objects$tidy_post$post_fit_ri_diff_int %>% 
-  group_by(emotion, .draw) %>% 
-  summarise(kappa_inv_ratio = mean(kappa_inv_ratio)) %>% 
-  ggplot(aes(x = log(kappa_inv_ratio), y = emotion)) +
-  geom_vline(xintercept = 0, linetype = "dashed", size = 0.5) +
-  stat_halfeye(size = 3,
-               position = position_dodge(width = 0.9)) +
+
+plot_Rho_b <- kappa_mean %>% 
+  clean_emotion_names(emotion) %>%
+  group_by(subject,emotion, group) %>%
+  summarise(variance = 1-kappa_mean) %>% 
+  ggplot(aes(x = variance, y = emotion, shape = group)) +
+  geom_vline(xintercept = 0.5, linetype = "dashed", size = 0.5) +
+  stat_halfeye(size = 1) +
+  facet_grid(group ~ . ) +
   theme_paper() +
-  theme(axis.title.y = element_blank(),axis.text.y = element_blank()) +
-  xlab(latex2exp::TeX("log $Ratio_{intensity}$")) +
-  scale_x_continuous(n.breaks = 4)
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position="none") +
+  xlab(latex2exp::TeX("$\\Delta_{video_set}$ Uncertainty$"))
 
-plot_kappa_intensity <- plot_grid(plot_kappa_intensity_a, plot_kappa_intensity_b,
-                             labels = "AUTO", rel_widths = c(3, 2), align = "hv")
+plot_uncertainty <- plot_grid(plot_Rho_a, plot_Rho_b, 
+                                  labels = "AUTO", rel_widths = c(3, 2), align = "hv")
+
 
 # Plot Intensity subtle vs full ------------------------------------------
+intensity_mean <-  dat_fit %>%
+  mutate(correct = ifelse(emotion == resp_emotion_label, "correct", "error"),
+         correct = as.factor(correct)) %>%
+  dplyr::select(id, magnitude, video_set, emotion, Pt.group, correct) %>%
+  'colnames<-'(c("subject", "intensity" ,"video_set", "emotion", "group", "correct")) %>%
+  group_by(subject, group, emotion, video_set, correct) %>%
+  summarise(int_mean = mean(intensity)) %>%
+  drop_na(int_mean)
 
-plot_int_intensity_a <- intensity_objects$tidy_post$post_fit_ri_int %>% 
+plot_intensity_a <- intensity_mean %>% 
   mutate(emotion = as.character(emotion)) %>% 
-  clean_emotion_names(emotion) %>% 
-  group_by(emotion, intensity, .draw) %>% 
-  summarise(int = mean(int)) %>% 
-  ggplot(aes(x = int, y = emotion, fill = intensity)) +
+  clean_emotion_names(emotion) %>%
+  ggplot(aes(x = int_mean, y = emotion, fill = video_set, shape = group )) +
   w_stat_halfeye() +
+  facet_grid(group ~ correct ) +
   theme_paper() +
   xlab("Perceived Intensity") +
   theme(axis.title.y = element_blank(),
-        legend.position = c(0.85, 0.10))
+        legend.position = c(0.01, 0.10))+
+  labs(fill = "video_set",
+       shape = "Group") 
 
-plot_int_intensity_b <- intensity_objects$tidy_post$post_fit_ri_diff_int %>% 
-  group_by(emotion, .draw) %>% 
-  summarise(int_diff = mean(int_diff)) %>% 
-  ggplot(aes(x = int_diff, y = emotion)) +
+plot_intensity_b <- intensity_mean %>% 
+  mutate(emotion = as.character(emotion)) %>% 
+  clean_emotion_names(emotion) %>%
+  group_by(subject,emotion,group,correct) %>%
+  summarise(int_mean = mean(int_mean)) %>% 
+  ggplot(aes(x = int_mean, y = emotion, shape = group )) +
   w_stat_halfeye() +
+  facet_grid(group ~ correct ) +
   theme_paper() +
   theme(axis.title.y = element_blank(),
-        axis.text.y = element_blank()) +
+        axis.text.y = element_blank(),
+        legend.position="none") +
   xlab(latex2exp::TeX("$\\Delta_{intensity}\\; Perceived \\;Intensity$"))
 
-plot_int_intensity <- plot_grid(plot_int_intensity_a, plot_int_intensity_b, 
+plot_intensity <- plot_grid(plot_intensity_a, plot_intensity_b, 
                            labels = "AUTO", rel_widths = c(3, 2), align = "hv")
 
 # Categorical Responses ---------------------------------------------------
@@ -262,17 +300,18 @@ dat$resp_emotion_label <- factor(dat$resp_emotion_label, levels = emo_coords$emo
 
 dat_summ <- dat %>% 
   drop_na(emotion)%>%
-  mutate(intensity = Video.intensity)%>%
+  mutate(video_set = Video.intensity)%>%
+  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))%>%
   filter(emotion != "neutrality") %>% 
-  group_by(emotion,intensity, resp_emotion_label) %>% 
+  group_by(emotion,video_set, resp_emotion_label,Pt.group) %>% 
   summarise(n = n())
 
 plot_gew_discrete <- dat_summ %>% 
-  mutate(intensity = stringr::str_to_title(intensity)) %>% 
+  mutate(video_set = stringr::str_to_title(video_set)) %>% 
   clean_emotion_names(emotion) %>% 
-  ggplot(aes(x = resp_emotion_label, y = n, fill = intensity)) +
+  ggplot(aes(x = resp_emotion_label, y = n, fill = video_set)) +
   geom_col(position = position_dodge()) +
-  facet_grid(emotion~intensity) +
+  facet_grid(emotion~Pt.group) +
   cowplot::theme_minimal_hgrid() +
   theme_paper(font_size = 10) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1,
@@ -286,16 +325,16 @@ plot_gew_discrete <- dat_summ %>%
         legend.position = "bottom",
         strip.text = element_text(face = "bold", size = 10),
         panel.grid.major.x = element_blank()) +
-  labs(fill = "Intensity")
+  labs(fill = "video_set")
 
 # Saving ------------------------------------------------------------------
 
 plot_list <- make_named_list(plot_gew_legend_neutral, 
                              plot_gew_emotions,
                              plot_gew_discrete,
-                             plot_angle_intensity, 
-                             #plot_kappa_intensity, 
-                             plot_int_intensity )
+                             plot_mean, 
+                             plot_uncertainty,
+                             plot_intensity )
 
 saveRDS(plot_list, file = "objects/paper_plots.rds")
 

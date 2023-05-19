@@ -32,12 +32,15 @@ dat_fit <- dat %>%
   filter(Wheel.task == "task", Wheel.name == "GW1" ,emotion != "neutrality") %>% 
   mutate(diff_theta = unname(deg_to_rad(diff)),
          emotion = factor(emotion),
-         intensity = Video.intensity)
+         video_set = Video.intensity)%>%
+  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))
+  
 
 # Setting sum to 0 contrast 
 
-contrasts(dat_fit$emotion) <- contr.sum(length(unique(dat_fit$emotion)))
-contrasts(dat_fit$intensity) <- contr.sum(length(unique(dat_fit$intensity)))
+# contrasts(dat_fit$emotion) <- contr.sum(length(unique(dat_fit$emotion)))
+# contrasts(dat_fit$intensity) <- contr.sum(length(unique(dat_fit$intensity)))
+# contrasts(dat_fit$Pt.group) <- contr.sum(length(unique(dat_fit$Pt.group)))
 
 # Saving ------------------------------------------------------------------
 
