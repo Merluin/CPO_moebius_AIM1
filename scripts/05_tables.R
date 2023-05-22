@@ -22,6 +22,7 @@ library(tidybayes)
 library(tidyr)
 library(here)
 library(purrr)
+library(magrittr)
 
 # Functions ---------------------------------------------------------------
 
@@ -111,9 +112,11 @@ demo<- dat_fit%>%
 # test: rad_to_deg(CircStats::circ.mean(dat$theta)) %% 360
 
 tab_eda <- dat %>% 
-  mutate(intensity = Video.intensity,
-         group = Pt.group)%>%
-  group_by(group, emotion,  intensity) %>%
+  mutate(video_set = Video.intensity,
+         group = Pt.group,
+         video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ),
+         group = ifelse(group == "moebius","Moebius" , "Control" ))%>%
+  group_by(group, emotion,  video_set) %>%
   summarise(m_angle = rad_to_deg(CircStats::circ.mean(theta)) %% 360,
             var_angle = 1 - CircStats::circ.disp(theta)$var,
             m_int = mean(magnitude),
@@ -129,10 +132,11 @@ tab_eda <- dat %>%
   theme_vanilla() %>% 
   set_header_labels(values = list(
     emotion = "Emotion",
-    angle_emo = "Wheel Angle°",
-    intensity = "Intensity",
+    degree_emo = "Wheel Angle°",
+    group = "Group",
+    video_set = "Video set",
     m_angle = "Mean°",
-    var_angle = "Var",
+    var_angle = "Variance",
     m_int = "Mean",
     sd_int = "SD"
   )) %>% 
@@ -142,16 +146,23 @@ tab_eda <- dat %>%
   merge_h(part = "header") %>% 
   align(align = "center", part = "all")
 
+tab_eda%>%
+  save_as_image(path = file.path("tables", "tab_eda.png"))
+
 # Angle/kappa Full vs Subtle ----------------------------------------------
 
-tab_kappa_angle_intensity_effect <- dat %>% 
-  mutate(intensity = Video.intensity,
-         group = Pt.group)%>%
-  group_by(group, emotion,  intensity) %>%
-  summarise(m_angle = rad_to_deg(CircStats::circ.mean(theta)) %% 360,
-            var_angle = 1 - CircStats::circ.disp(theta)$var,
-            m_int = mean(magnitude),
-            sd_int = sd(magnitude)) %>%
+
+
+
+tab_kappa_angle_intensity_effect <- dat_fit%>%
+  mutate(circulardiff = circular(diff, units = "degrees" ))%>%
+  dplyr::select(id,Pt.group,emotion,video_set,circulardiff)%>%
+  'colnames<-'(c("subject","group","emotion" ,"video_set", "err_mean"))%>%
+  drop_na(err_mean)%>%
+  group_by(subject,group,emotion,video_set)%>%
+  summarise(err_mean = mean.circular(err_mean))%>%
+  spread(video_set,err_mean)%>%
+  mutate(set_diff = ang_diff(ADFES,JeFFE))
   
   summarise(angle_full = mean(full, na.rm = TRUE),
             angle_subtle = mean(subtle, na.rm = TRUE),
@@ -189,42 +200,15 @@ CircularMean <- dat_fit%>%
   mutate(correct = ifelse(emotion == resp_emotion_label, 1,0),
          correct = as.factor(correct),
          circulardiff = circular(diff, units = "degrees" ))%>%
-  dplyr::select(id,circulardiff,magnitude,intensity,emotion,Pt.group,correct)%>%
-  'colnames<-'(c("subject","degree","magnitude" ,"intensity", "emotion","group","correct"))%>%
+  dplyr::select(id,circulardiff,magnitude,video_set,emotion,Pt.group,correct)%>%
+  'colnames<-'(c("subject","degree","magnitude" ,"video_set", "emotion","group","correct"))%>%
   drop_na(degree)%>%
-  group_by(subject,group,emotion,intensity)%>%
+  group_by(subject,group,emotion,video_set,correct)%>%
   summarise(circular_mean = mean.circular(degree),
             rho_mean = rho.circular(degree),
             mag_mean = mean(magnitude))
 
-tab_int_intensity_effect <- CircularMean %>% 
-  group_by(group, emotion, intensity) %>% 
-  summarise(mag_mean = mean(mag_mean)) %>% 
-  pivot_wider(names_from = intensity, values_from = mag_mean) %>% 
-  mutate(int_diff = full - subtle) %>% 
-  select(group, emotion, full, subtle, int_diff) %>% 
-  pivot_longer(3:(ncol(.) - 1), names_to = "param", values_to = "value") %>% 
-  group_by(group, param) %>% 
-  nest() %>% 
-  mutate(null = 0,
-         summary = map(data, get_post_summary, emotion, TRUE)) %>% 
-  unnest(summary) %>% 
-  select(param, emotion,group, value_chr) %>% 
-  mutate(param = case_when(grepl("full", param) ~ "Intensity~full~",
-                           grepl("subtle", param) ~ "Intensity~subtle~",
-                           TRUE ~ "Contrast"),
-         emotion = as.character(emotion)) %>% 
-  ungroup() %>% 
-  pivot_wider(names_from = param, values_from = value_chr) %>%
-  clean_emotion_names(emotion) %>%
-  set_emotion_order(emotion, emo_order, dpar = FALSE) %>% 
-  flextable_with_param() %>% 
-  align(part = "header", align = "center") %>% 
-  align(j = 2, part = "body", align = "center") %>% 
-  merge_v(1) %>% 
-  set_header_labels(values = list(
-    emotion = "Emotion"
-  ))
+tab_int_intensity_effect <-  b
 
 # Accuracy GEW ------------------------------------------------------------
 

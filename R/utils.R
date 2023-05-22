@@ -401,3 +401,136 @@ get_all_packages <- function(){
   pkgs <- invisible(renv::dependencies())
   unique(pkgs$Package)
 }
+
+#' ggsave_plot
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+ggsave_plot <- function(plot, name, device = c("png", "tiff", "eps", "pdf", "svg"),
+                        width = width, height = height){
+  device <- match.arg(device)
+  name <- paste0(name, ".", device)
+  ggsave(plot, filename = name, device = device, width = width, height = height)
+}
+
+#' theme_paper
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+theme_paper <- function(font_size = 12){
+  cowplot::theme_minimal_grid(font_size = font_size)
+}
+
+#' put_note
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+put_note <- function(x, y, text, size = 3, ...){
+  annotate("label", x, y, label = text, 
+           fontface = 2, 
+           fill = "white", 
+           label.size = NA,
+           size = size,
+           ...)
+}
+
+#' w_stat_halfeye
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+w_stat_halfeye <- function(alpha = 0.8){
+  stat_halfeye(alpha = alpha, 
+               size = 2.5, 
+               .width = 0.95)
+}
+
+#' save_table
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+save_table <- function(table, path){
+  save_as_docx(table, path = path)
+}
+
+#' flextable_with_param
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+flextable_with_param <- function(data){
+  data %>% 
+    flextable() %>% 
+    autofit() %>% 
+    theme_vanilla() %>% 
+    colformat_md(part = "all") %>% 
+    fontsize(part = "all", size = 9)
+}
+
+#' get_post_summary
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+get_post_summary <- function(data, group, sign = FALSE, null = 0){
+  group <- rlang::enexpr(group)
+  out <- data %>% 
+    group_by(!!group) %>% 
+    median_hdci(value) %>% 
+    select(emotion, value, .lower, .upper)
+  if(sign){
+    out %>% 
+      mutate(across(where(is.numeric), round, 3),
+             value_chr = sprintf("**%s** [%s, %s]", value, .lower, .upper),
+             value_chr = ifelse(.lower <= null & null <= .upper,
+                                value_chr,
+                                paste(value_chr, "*")))
+  }else{
+    out
+  }
+}
+
+#' set_emotion_order
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+#'
+set_emotion_order <- function(data, col, levels, dpar = TRUE){
+  col <- rlang::enexpr(col)
+  data %>% 
+    mutate(!!col := factor(!!col, levels = levels)) %>% {
+      if(dpar){
+        arrange(., main_param, !!col)
+      }else{
+        arrange(., !!col)
+      }
+    }
+}
+
+#' get_chunk_label
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+#'
+get_chunk_label <- function(){
+  knitr::opts_current$get("label")
+}
+#' qtab
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+#'
+qtab <- function(data, max_width = 6){
+  data %>% 
+    flextable() %>% 
+    autofit() %>% 
+    theme_vanilla() %>% 
+    fit_to_width(max_width = max_width)
+}

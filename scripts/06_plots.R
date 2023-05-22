@@ -101,18 +101,19 @@ gew_legend <- emo_coords %>%
 #          emotion = forcats::fct_relevel(emotion, "Neutral"))
 dat_plot <- dat %>% 
   dplyr::select(Pt.group,Wheel.task,emotion,Wheel.name, Video.intensity, x_cen, y_cen) %>% 
-  mutate( intensity = stringr::str_to_title(Video.intensity),
+  mutate( video_set = stringr::str_to_title(Video.intensity),
+          video_set = ifelse(video_set == "Full","ADFES" , "JeFFE" ),
           emotion = stringr::str_to_title(emotion),
           emotion = ifelse(emotion == "Neutrality", "Neutral", emotion),
           emotion = factor(emotion),
           emotion = forcats::fct_relevel(emotion, "Neutral"))
 
 neutral_plot <- dat_plot %>% 
-  filter(emotion == "Neutral") %>% 
+  filter(emotion == "Neutral" & Wheel.name == "GW1") %>% 
   ggplot(aes(x = x_cen, y = y_cen)) +
   ggpubr::background_image(bg) +
   geom_point(alpha = 0.5, show.legend = FALSE, size = 3) +
-  ggh4x::facet_nested(Video.intensity ~ emotion, switch="y") +
+  ggh4x::facet_nested(video_set ~ emotion, switch="y") +
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300)) +
   theme_minimal() +
   theme(axis.text.x = element_blank(),
@@ -124,13 +125,13 @@ neutral_plot <- dat_plot %>%
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "white", color = NA))+
-  facet_grid(Pt.group ~ Wheel.name)
+  facet_grid(Pt.group ~ video_set)
 
 plot_gew_legend_neutral <- plot_grid(neutral_plot, gew_legend, labels = "AUTO")
 
 plot_gew_emotions <- dat_plot %>% 
   filter(emotion != "Neutral", Wheel.task == "task") %>% 
-  ggplot(aes(x = x_cen, y = y_cen, color = intensity)) +
+  ggplot(aes(x = x_cen, y = y_cen, color = video_set)) +
   ggpubr::background_image(bg) +
   geom_point(alpha = 0.5, size = 1) +
   ggh4x::facet_nested( Pt.group + Wheel.name  ~ emotion) +
