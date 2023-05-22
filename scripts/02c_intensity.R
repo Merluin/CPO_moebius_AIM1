@@ -3,7 +3,7 @@
 #  Experiment:  CARIPARO
 #  Programmer:  QUETTIER THOMAS
 #  Date:        19/05/2023
-#  Description: Generate the dataset from Gorilla (https://app.gorilla.sc/) 
+#  Description: Computes dataset, plot, table, fit model for Intensity measure  
 #  Experiment CPO_moebius_AMIM1
 #
 #  Update:      19/05/2023
@@ -12,39 +12,25 @@
 rm(list=ls()) # remove all objects
 
 # Packages ----------------------------------------------------------------
-
 library(afex)
-
 library(bayestestR)
 library(BayesFactor)
 library(brms)
 library(bpnreg)
-
 library(cowplot)
 library(circular)
-
 library(dplyr)
-
 library(emmeans)
-
 library(flextable)
 library(flexplot)
-
 library(ggplot2)
-
 library(here)
-
 library(kableExtra)
-
 library(lme4)
-
 library(magick)
-
 library(phia)
 library(purrr)
-
 library(sjPlot)
-
 library(tidybayes)
 library(tidyverse)
 library(tidyr)
@@ -57,7 +43,11 @@ devtools::load_all()
 
 datasetname<-"dataset"
 
+# Load the fitted dataset
 dat_fit <- readRDS(file = file.path("data",paste0(datasetname,"_fit.rds")))
+
+# Load the neutral dataset
+dat <- readRDS(file.path("data",paste0(datasetname,"_valid.rds")))
 
 # Calculate mean intensity
 intensity_mean <-  dat_fit %>%
@@ -69,14 +59,103 @@ intensity_mean <-  dat_fit %>%
   summarise(int_mean = mean(intensity)) %>%
   drop_na(int_mean)
 
-# Model fitting
-emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise")
+# Calculate intensity mean for neutral dataset
+dat_neutral <- dat %>% 
+  filter(Wheel.task == "task", Wheel.name == "GW1" ,emotion == "neutrality") %>% 
+  mutate(video_set = Video.intensity,
+  video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ),
+  emotion = "neutral")%>%
+  dplyr::select(id,Pt.group,emotion,video_set,magnitude)%>%
+  'colnames<-'(c("subject" ,"group","emotion","video_set","rho"))%>%
+  drop_na(rho)%>%
+  group_by(subject,group,emotion,video_set)%>%
+  summarise(int_mean = mean(rho))
+
+# Plot Angle ADFES vs JeFFE ----------------------------------------------
+
+# Generate the first plot
+plot_intensity_a <- intensity_mean %>% 
+  mutate(emotion = as.character(emotion)) %>% 
+  clean_emotion_names(emotion) %>%
+  ggplot(aes(x = int_mean, y = emotion, fill = video_set, shape = group )) +
+  w_stat_halfeye() +
+  facet_grid(group ~ correct ) +
+  theme_paper() +
+  xlab("Perceived Intensity") +
+  theme(axis.title.y = element_blank(),
+        legend.position = c(0.01, 0.10))+
+  labs(fill = "video_set",
+       shape = "Group") 
+
+# Generate the second plot
+plot_intensity_b <- intensity_mean %>% 
+  mutate(emotion = as.character(emotion)) %>% 
+  clean_emotion_names(emotion) %>%
+  group_by(subject,emotion,group,correct) %>%
+  summarise(int_mean = mean(int_mean)) %>% 
+  ggplot(aes(x = int_mean, y = emotion, shape = group )) +
+  w_stat_halfeye() +
+  facet_grid(group ~ correct ) +
+  theme_paper() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position="none") +
+  xlab(latex2exp::TeX("$\\Delta_{intensity}\\; Perceived \\;Intensity$"))
+
+# Create a combined plot
+plot_intensity <- cowplot::plot_grid(plot_intensity_a, plot_intensity_b, 
+                            labels = "AUTO", rel_widths = c(3, 2), align = "hv")
+
+# Create a list of plots
+plot_list <- make_named_list(plot_intensity_a, 
+                             plot_intensity_b,
+                             plot_intensity)
+
+# Save the list of plots as an RDS file
+saveRDS(plot_list, file = "objects/plots_intensity.rds")
+
+# Save the combined plot as a PNG file
+ggsave_plot(plot_intensity,
+            name = file.path("figures", "png", "plots_intensity"),
+            device = "png", width = 16, height = 9)
+
+# Table intensity ADFES vs JeFFE ----------------------------------------------
+
+# Generate a table summarizing the intensities
+tab_intensity <- intensity_mean%>%
+  drop_na(int_mean)%>%
+  group_by(emotion,group,video_set)%>%
+  reframe(int_mean = mean(int_mean))%>%
+  spread(video_set,int_mean)%>%
+  mutate(set_diff = ADFES- JeFFE)%>%
+  'colnames<-'(c("Emotion" ,"Group","Video~ADEFS~", "Video~JeFFE~","Intensity~Bias~" ))%>%
+  flextable_with_param() %>% 
+  align(part = "header", align = "center") %>% 
+  align(j = 2, part = "body", align = "center") %>% 
+  merge_v(1)
+
+# Save the table as an RDS file
+saveRDS(tab_intensity, file = here("objects", "intensity_tables.rds"))
+
+# Fit linear mixed-effects model for each emotion
+emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise","neutral")
 
 for(i in 1:length(emo)){
+  
   # Fit linear mixed-effects model
-  fit <- lmer(int_mean ~ video_set * group * correct + (1|subject),
-              data = intensity_mean %>%
-                filter(emotion == emo[i]))
+  
+  if(emo[i]== "neutral"){
+    # Fit the model for neutral data
+    fit <- lmer(int_mean ~ video_set * group + (1|subject) ,
+                data = dat_neutral)
+  }else{
+    # Fit the model for each emotion
+    fit <- lmer(int_mean ~ video_set * group * correct + (1|subject),
+                data = intensity_mean %>%
+                  filter(emotion == emo[i]))
+  }
+  
+  
   
   # Generate table summary
   table <- tab_model(fit, show.df = TRUE, string.p = "p adjusted", p.adjust = "bonferroni")

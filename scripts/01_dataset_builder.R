@@ -82,14 +82,29 @@ dat_fit <- dat %>%
   filter(Wheel.task == "task", Wheel.name == "GW1" ,emotion != "neutrality") %>% 
   mutate(diff_theta = unname(deg_to_rad(diff)),
          emotion = factor(emotion),
-         video_set = Video.intensity)%>%
-  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))
+         video_set = Video.intensity,
+         video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ),
+         group = Pt.group)
 
+dat_neutral <- dat %>% 
+  filter(Wheel.task == "task", Wheel.name == "GW1" ,emotion == "neutrality") %>% 
+  mutate(theta_cen = theta - pi ,# centering pi
+         theta_cen = theta_cen * ( 180.0 / pi ), # radius to degree
+         theta_cen = circular(theta_cen, units = "degrees" ),
+         emotion = factor(emotion),
+         video_set = Video.intensity)%>%
+  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))%>%
+  dplyr::select(id,video_set,Pt.group,theta_cen)%>%
+  'colnames<-'(c("subject" ,"video_set","group","theta"))%>%
+  drop_na(theta)%>%
+  group_by(subject,group,video_set)%>%
+  summarise(theta = mean.circular(theta))
 # Saving ------------------------------------------------------------------
 
 saveRDS(dat,file.path("data", paste0(datasetname,"_valid.rds")))
 saveRDS(coords, file = file.path("objects", "emo_coords.rds"))
 saveRDS(dat_fit, file = file.path("data",paste0(datasetname,"_fit.rds")))
+saveRDS(dat_neutral, file = file.path("data",paste0(datasetname,"_neutral.rds")))
 
 #################################################
 # 

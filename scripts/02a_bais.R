@@ -3,7 +3,7 @@
 #  Experiment:  CARIPARO
 #  Programmer:  QUETTIER THOMAS 
 #  Date:        0382022
-#  Description: Generate the dataset from Gorilla (https://app.gorilla.sc/) 
+#  Description: Computes dataset, plot, table, fit model for Bais measure 
 #  Experiment CPO_moebius_AMIM1
 #
 #  Update:      13/08/2022
@@ -13,44 +13,33 @@ rm(list=ls()) # remove all objects
 
 # Packages ----------------------------------------------------------------
 
+# Loading required packages
 library(afex)
-
 library(bayestestR)
 library(BayesFactor)
 library(brms)
 library(bpnreg)
-
 library(cowplot)
 library(circular)
-
 library(dplyr)
-
 library(emmeans)
-
 library(flextable)
 library(flexplot)
-
 library(ggplot2)
-
 library(here)
-
 library(kableExtra)
-
 library(lme4)
-
 library(magick)
-
 library(phia)
 library(purrr)
-
 library(sjPlot)
-
 library(tidybayes)
 library(tidyverse)
 library(tidyr)
 
 # Functions ---------------------------------------------------------------
 
+# Load the description file of the package
 #usethis::use_description( check_name = FALSE)
 devtools::load_all()
 
@@ -68,10 +57,12 @@ n.lags = 3
 
 datasetname<-"dataset"
 
+# Load the fitted dataset
 dat_fit <- readRDS(file = file.path("data",paste0(datasetname,"_fit.rds")))
+# Load the neutral dataset
+dat_neutral  <- readRDS(file = file.path("data",paste0(datasetname,"_neutral.rds")))
 
-emo_order = c("Surprise", "Sadness", "Happiness", "Fear", "Disgust", "Anger")
-
+# Calculate circular mean for fitted dataset
 CircularMean <- dat_fit%>%
   mutate(circulardiff = circular(diff, units = "degrees" ))%>%
   dplyr::select(id,Pt.group,emotion,video_set,circulardiff)%>%
@@ -80,9 +71,17 @@ CircularMean <- dat_fit%>%
   group_by(subject,group,emotion,video_set)%>%
   summarise(err_mean = mean.circular(err_mean))
 
+# Calculate circular mean for neutral dataset
+dat_neutral <- dat_neutral%>%
+  mutate(theta = circular(theta, units = "degrees" ))%>%
+  dplyr::select(subject,group,video_set,theta)%>%
+  drop_na(theta)%>%
+  group_by(subject,group,video_set)%>%
+  summarise(theta_cen = mean.circular(theta))
 
 # Plot Angle ADFES vs JeFFE ----------------------------------------------
 
+# Generate the first plot
 plot_angle_a<- CircularMean %>% 
   mutate(emotion = as.character(emotion)) %>% 
   clean_emotion_names(emotion) %>%
@@ -99,6 +98,7 @@ plot_angle_a<- CircularMean %>%
   labs(fill = "Group",
        shape = "video_set") 
 
+# Generate the second plot
 plot_angle_b <- CircularMean %>% 
   clean_emotion_names(emotion) %>%
   group_by(subject,emotion, video_set) %>%
@@ -111,23 +111,29 @@ plot_angle_b <- CircularMean %>%
   theme(axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         legend.position="none") +
-  xlab(latex2exp::TeX("$\\Delta_{group}$ Bias$"))
+  xlab(latex2exp::TeX("$\\Delta_{group}$ Bias"))
 
-plot_mean <- plot_grid(plot_angle_a, plot_angle_b, 
-                       labels = "AUTO", rel_widths = c(3, 2), align = "hv")
+# Create a combined plot
+plot_bais <- cowplot::plot_grid(plot_angle_a, plot_angle_b, 
+                                labels = "AUTO", rel_widths = c(3, 2), align = "hv")
 
+# Create a list of plots
 plot_list <- make_named_list(plot_angle_a, 
                              plot_angle_b,
-                             plot_mean)
+                             plot_bais)
 
+# Save the list of plots as an RDS file
 saveRDS(plot_list, file = "objects/plots_bais.rds")
-ggsave_plot(plot_mean,
+
+# Save the combined plot as a PNG file
+ggsave_plot(plot_bais,
             name = file.path("figures", "png", "plot_bais"),
             device = "png", width = 16, height = 9)
 
 
 # Table Angle ADFES vs JeFFE ----------------------------------------------
 
+# Generate a table summarizing the angle biases
 tab_bais <- dat_fit%>%
   mutate(circulardiff = circular(diff, units = "degrees" ))%>%
   dplyr::select(id,Pt.group,emotion,video_set,circulardiff)%>%
@@ -143,33 +149,39 @@ tab_bais <- dat_fit%>%
   align(j = 2, part = "body", align = "center") %>% 
   merge_v(1)
 
-saveRDS(tab_bais, file = here("objects", "paper_tables.rds"))
+# Save the table as an RDS file
+saveRDS(tab_bais, file = here("objects", "bais_tables.rds"))
 
 # Circular mean mixed effects model---------------------------------
 
 
 # err_mean ~  video_set * group + (1|subject) 
+# normalized data for emotions
 min<-min(CircularMean$err_mean)
 max<-max(CircularMean$err_mean)
 CircularMean$normalized_mean = ((CircularMean$err_mean - min) / (max - min))
+# normalized data for neutral
+min<-min(dat_neutral$theta_cen)
+max<-max(dat_neutral$theta_cen)
+dat_neutral$normalized_mean = ((dat_neutral$theta_cen - min) / (max - min))
 
-emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise")
+# Fit linear mixed-effects model for each emotion
+emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise","neutral")
 
 for(i in 1:length(emo)){
-  # Fit linear mixed-effects model
-  fit <- lmer(normalized_mean ~ video_set * group + (1|subject),
-              data = CircularMean %>%
-                filter(emotion == emo[i]))
   
-  # fit <- bpnme(normalized_mean ~ video_set * group + (1|subject),
-  #             data = CircularMean %>%
-  #               filter(emotion == emo[i]),
-  #             its = iter, 
-  #             burn = burns, 
-  #             n.lag = n.lags, 
-  #             seed = seeds)}
+  if(emo[i]== "neutral"){
+    # Fit the model for neutral data
+    fit <- lmer(normalized_mean ~ video_set * group + (1|subject) ,
+                data = dat_neutral)
+  }else{
+    # Fit the model for each emotion
+    fit <- lmer(normalized_mean ~ video_set * group + (1|subject),
+                data = CircularMean %>%
+                  filter(emotion == emo[i]))
+  }
   
-  # Generate table summary
+  # Generate table summary of the model
   table <- tab_model(fit, show.df = TRUE, string.p = "p adjusted", p.adjust = "bonferroni")
   
   # Perform ANOVA
@@ -189,42 +201,9 @@ for(i in 1:length(emo)){
     column_spec(4, color = ifelse(chiquadro$`Pr(>Chisq)` <= 0.05, "red", "black")) %>%
     kable_classic(full_width = F, html_font = "Cambria")
   
-  # Save the results
+  # Save the results as RData files
   save(fit, table, chiquadro, plot, chi_table, file = file.path("models", "theta", paste0("bais_", emo[i], ".RData")))
 }
-
-
-
-# Model neutro - (neutral faces) ------------------------------------------
-
-
-dat_neutral <- dat %>% 
-  filter(Wheel.task == "task", Wheel.name == "GW1" ,emotion == "neutrality") %>% 
-  mutate(theta_cen = theta - pi,# centering pi
-         theta_cen = theta_cen * ( 180.0 / pi ), # radius to degree 
-         theta_cen = circular(theta_cen, units = "degrees" ),
-         id = as.numeric(Pt.code),
-         intensity = Video.intensity)%>%
-  dplyr::select(id,theta_cen,intensity,Pt.group)%>%
-  'colnames<-'(c("subject","degree" ,"intensity","group"))%>%
-  drop_na(degree)%>%
-  group_by(subject,group,intensity)%>%
-  summarise(degree = mean.circular(degree))
-
-# Model 7 - degree ~ emotion * group + (1|subject) 
-from.fit7 <- bf(degree ~ intensity * group + (1|subject))
-
-CircularMean.fit7 <- bpnme(from.fit7$formula,
-                           data = dat_neutral,
-                           its = iter, 
-                           burn = burns, 
-                           n.lag = n.lags, 
-                           seed = seeds)
-
-success_step(CircularMean.fit7)
-saveRDS(CircularMean.fit7,file.path("models","theta","CircularMean.fit7.rds"))
-
-
 
 #################################################
 # 
