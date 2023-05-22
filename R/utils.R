@@ -173,6 +173,7 @@ create_dir_structure <- function(){
   mkdir_if("models")
   mkdir_if("models/theta")
   mkdir_if("models/intensity")
+  mkdir_if("models/kappa")
   mkdir_if("objects")
   mkdir_if("figures")
   mkdir_if("tables")
@@ -533,4 +534,15 @@ qtab <- function(data, max_width = 6){
     autofit() %>% 
     theme_vanilla() %>% 
     fit_to_width(max_width = max_width)
+}
+
+#' loadEnvironment
+#' @description return all unique packages used in the project. Is a wrapper of \code{renv::dependencies()}
+#' @return a character vector
+#' @export
+#'
+#'
+loadEnvironment <- function(RData, env = new.env()){
+  load(RData, env)
+  return(env)
 }
