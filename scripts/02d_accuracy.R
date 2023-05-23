@@ -133,9 +133,24 @@ emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise")
 
 for(i in 1:length(emo)){
   
-  fit <- lmer(acc ~  group * video_set + (1|subject),
-                   data = accuracy%>%
-                filter(emotion == emo[i])%>%na.omit())
+  
+  # Adatta il modello di regressione logistica
+  x<-correct_data%>%
+    filter(emotion == emo[i])%>%
+    na.omit()%>%
+    mutate(video_set = as.factor(video_set))
+  
+  fit <- glm(correct ~  group * video_set, data = x, family = binomial)
+  
+  x$predicted_prob <- predict(fit, type = "response")
+  
+
+  
+  
+  
+  # fit <- lmer(acc ~  group * video_set + (1|subject),
+  #                  data = accuracy%>%
+  #               filter(emotion == emo[i])%>%na.omit())
   
   # Generate table summary
   table <- tab_model(fit, show.df = TRUE, string.p = "p adjusted", p.adjust = "bonferroni")
@@ -144,11 +159,16 @@ for(i in 1:length(emo)){
   chiquadro <- car::Anova(fit, type = 3)
   
   # Generate model plot
-  plot <- flexplot::visualize(fit, plot = "model") +
-    theme(legend.position = "none") +
-    ylab("accuracy") +
-    xlab(paste("Video", emo[i]))
-  
+  plot <-   # Visualizza le stime di probabilità
+    ggplot(x, aes(x = group, y = predicted_prob, color = video_set)) +
+    geom_point(position = position_dodge(0.9), size = 3) +
+    labs(x = "Group", y = "Predicted Probability", color = "Video Set")
+    
+    # flexplot::visualize(fit, plot = "model") +
+    # theme(legend.position = "none") +
+    # ylab("accuracy") +
+    # xlab(paste("Video", emo[i]))
+    # 
   # Create ANOVA table
   chi_table <- chiquadro %>%
     drop_na(`Pr(>Chisq)`) %>%
