@@ -157,24 +157,11 @@ tab_eda <- dat_fit %>%
   merge_h(part = "header") %>% 
   align(align = "center", part = "all")
 
-# Accuracy GEW ------------------------------------------------------------
 
-tab_acc_gew <- dat_fit %>% 
-    mutate(acc = ifelse(emotion == resp_emotion_label, 1, 0)) %>%
-    group_by(group,emotion, video_set) %>% 
-    summarise(acc = mean(acc, na.rm = TRUE )) %>% 
-    pivot_wider(names_from = emotion, values_from = acc) %>% 
-    flextable() %>% 
-    colformat_double(digits = 2) %>% 
-    autofit() %>% 
-    merge_v(j = 1:2) %>% 
-    theme_vanilla() %>% 
-    align(align = "center")
   
 # Saving ------------------------------------------------------------------
 
-tab_list <- make_named_list(tab_eda,demo_tab, pt_tab,tab_eda,
-                            tab_acc_gew)
+tab_list <- make_named_list(tab_eda,demo_tab, pt_tab,tab_eda)
 
 tab_files <- paste0(names(tab_list), ".docx")
 

@@ -3,10 +3,14 @@
 #  Experiment:  CARIPARO
 #  Programmer:  QUETTIER THOMAS 
 #  Date:        0382022
-#  Description: Computes dataset, plot, table, fit model for Bais measure 
+#     This script performs data analysis for the CARIPARO experiment, 
+#     specifically for the Bais measure of the CPO_moebius_AMIM1 experiment. 
+#     It computes datasets, generates plots, tables, and fits a 
+#     mixed-effects model to analyze the angle biases between ADFES and JeFFE.
+#
 #  Experiment CPO_moebius_AMIM1
 #
-#  Update:      13/08/2022
+#  Update:      23/05/2023
 ###########################################################################
 
 rm(list=ls()) # remove all objects
@@ -168,11 +172,12 @@ dat_neutral$normalized_mean = ((dat_neutral$theta_cen - min) / (max - min))
 # Fit linear mixed-effects model for each emotion
 emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise","neutral")
 
+
 for(i in 1:length(emo)){
   
   if(emo[i]== "neutral"){
     # Fit the model for neutral data
-    fit <- lmer(normalized_mean ~ video_set * group + (1|subject) ,
+    fit <- lmer( normalized_mean ~ video_set * group + (1|subject),
                 data = dat_neutral)
   }else{
     # Fit the model for each emotion
@@ -193,14 +198,15 @@ for(i in 1:length(emo)){
     ylab("Bais normalized angle error") +
     xlab(paste("Video", emo[i]))
   
-  # Create ANOVA table
+  # Create ANOVA table from lmer
+  
   chi_table <- chiquadro %>%
     drop_na(`Pr(>Chisq)`) %>%
     mutate(`Pr(>Chisq)` = round(`Pr(>Chisq)`, 3)) %>%
     kbl(caption = "Anova(model, type = 3)") %>%
     column_spec(4, color = ifelse(chiquadro$`Pr(>Chisq)` <= 0.05, "red", "black")) %>%
     kable_classic(full_width = F, html_font = "Cambria")
-  
+
   # Save the results as RData files
   save(fit, table, chiquadro, plot, chi_table, file = file.path("models", "theta", paste0("bais_", emo[i], ".RData")))
 }

@@ -116,71 +116,35 @@ plot_gew_emotions <- dat_plot %>%
         panel.background = element_rect(fill = "white", color = NA)) +
   scale_fill_manual(values = c("NA", "white"))
 
+# Emotions circular mean Plots ---------------------------------------------------------------
 
-# Categorical Responses ---------------------------------------------------
+meandegree_plot <- dat %>% 
+  filter(Wheel.task == "task" & emotion != "neutrality" & Wheel.name == "GW1") %>% 
+  mutate( diff = circular(diff, units = "degrees" ),
+          video_set = stringr::str_to_title(Video.intensity),
+          video_set = ifelse(video_set == "Full","ADFES" , "JeFFE" ),
+          emotion = factor(emotion),
+          Group = Pt.group) %>%
+dplyr::select(id,Group,emotion,Wheel.name, video_set, diff, degree)%>%
+  group_by(Group,emotion,Wheel.name,video_set)%>%
+  summarise(Theta = mean.circular(diff, na.rm = TRUE),
+            Kappa = rho.circular(degree, na.rm = TRUE)) %>%
+  mutate(line = ifelse(Group == "control","dotted" , "solid" ))
 
-# order as the wheel 1
-dat$resp_emotion_label <- factor(dat$resp_emotion_label, levels = emo_coords$emo_order)
+plot_Theta_Kappa <-meandegree_plot%>% 
+  ggplot(aes(x=Theta, y=Kappa, color = Group , linetype = line ) ) +
+  coord_polar() +
+  expand_limits(x=c(-90,90)) +
+  geom_segment(aes(y=0, xend=Theta, yend=Kappa), size = 1) +
+  theme_minimal() +
+  guides(linetype="none") +
+  facet_grid( video_set ~ emotion) +
+  theme(strip.text.x = element_text(size = 14, face = "bold"),
+        legend.position = "bottom") +
+  xlab("Theta (Bais)") +
+  ylab("Kappa (Uncertainty = 1-Kappa)")
+  
 
-dat_summ <- dat %>% 
-  drop_na(emotion)%>%
-  mutate(video_set = Video.intensity)%>%
-  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))%>%
-  filter(emotion != "neutrality" & Wheel.name == "GW1") %>% 
-  group_by(emotion,video_set, resp_emotion_label,Pt.group) %>% 
-  summarise(n = n())
-
-plot_gew1_discrete <- dat_summ %>% 
-  mutate(video_set = stringr::str_to_title(video_set)) %>% 
-  clean_emotion_names(emotion) %>% 
-  ggplot(aes(x = resp_emotion_label, y = n, fill = video_set)) +
-  geom_col(position = position_dodge()) +
-  facet_grid(emotion~Pt.group) +
-  cowplot::theme_minimal_hgrid() +
-  theme_paper(font_size = 10) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1,
-                                   face = ifelse(levels(dat_summ$resp_emotion_label) %in% unique(dat_summ$emotion),
-                                                 "bold", "plain"),
-                                   size = ifelse(levels(dat_summ$resp_emotion_label) %in% unique(dat_summ$emotion),
-                                                 10, 8)),
-        axis.text.y = element_text(size = 8),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "bottom",
-        strip.text = element_text(face = "bold", size = 10),
-        panel.grid.major.x = element_blank()) +
-  labs(fill = "video_set")
-
-# order as the wheel 2
-
-dat_summ <- dat %>% 
-  drop_na(emotion)%>%
-  mutate(video_set = Video.intensity)%>%
-  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))%>%
-  filter(emotion != "neutrality" & Wheel.name == "GW2") %>% 
-  group_by(emotion,video_set, resp_emotion_label,Pt.group) %>% 
-  summarise(n = n())
-
-plot_gew2_discrete <- dat_summ %>% 
-  mutate(video_set = stringr::str_to_title(video_set)) %>% 
-  clean_emotion_names(emotion) %>% 
-  ggplot(aes(x = resp_emotion_label, y = n, fill = video_set)) +
-  geom_col(position = position_dodge()) +
-  facet_grid(emotion~Pt.group) +
-  cowplot::theme_minimal_hgrid() +
-  theme_paper(font_size = 10) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1,
-                                   face = ifelse(levels(dat_summ$resp_emotion_label) %in% unique(dat_summ$emotion),
-                                                 "bold", "plain"),
-                                   size = ifelse(levels(dat_summ$resp_emotion_label) %in% unique(dat_summ$emotion),
-                                                 10, 8)),
-        axis.text.y = element_text(size = 8),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "bottom",
-        strip.text = element_text(face = "bold", size = 10),
-        panel.grid.major.x = element_blank()) +
-  labs(fill = "video_set")
 
 # Saving ------------------------------------------------------------------
 
@@ -188,8 +152,7 @@ plot_list <- make_named_list(gew_legend,
                              neutral_plot,
                              plot_gew_legend_neutral, 
                              plot_gew_emotions,
-                             plot_gew1_discrete,
-                             plot_gew2_discrete )
+                             plot_Theta_Kappa)
 
 saveRDS(plot_list, file = "objects/paper_plots.rds")
 
@@ -226,13 +189,6 @@ ggsave_plot(plot_list$plot_gew_legend_neutral,
             name = file.path("figures", "pdf", "plot_gew_legend_neutral"),
             device = "pdf", width = 16, height = 9)
 
-ggsave_plot(plot_list$plot_gew1_discrete,
-            name = file.path("figures", "png", "plot_gew_discrete"),
-            device = "png", width = 15, height = 10)
-
-ggsave_plot(plot_list$plot_gew1_discrete,
-            name = file.path("figures", "pdf", "plot_gew_discrete"),
-            device = "pdf", width = 15, height = 10)
 
 ggsave_plot(plot_list$plot_gew_emotions,
             name = file.path("figures", "png", "plot_gew_emotions"),
@@ -247,3 +203,7 @@ ggsave_plot(plot_list$plot_gew_emotions,
 # END
 #
 #################################################
+
+
+
+

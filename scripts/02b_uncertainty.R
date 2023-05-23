@@ -3,10 +3,14 @@
 #  Experiment:  CARIPARO
 #  Programmer:  QUETTIER THOMAS 
 #  Date:        0382022
-#  Description: Computes dataset, plot, table, fit model for Uncertainty measure  
+#     This script performs data analysis for the CARIPARO experiment, 
+#     specifically for the Uncertainty measure of the CPO_moebius_AMIM1 experiment. 
+#     It computes datasets, generates plots, tables, and fits a 
+#     mixed-effects model to analyze the angle Uncertainty between ADFES and JeFFE.
+#
 #  Experiment CPO_moebius_AMIM1
 #
-#  Update:      13/08/2022
+#  Update:      23/05/2023
 ###########################################################################
 
 rm(list=ls()) # remove all objects
@@ -24,6 +28,7 @@ library(dplyr)
 library(emmeans)
 library(flextable)
 library(flexplot)
+library(ftExtra)
 library(ggplot2)
 library(here)
 library(kableExtra)
@@ -54,9 +59,9 @@ dat_neutral  <- readRDS(file = file.path("data",paste0(datasetname,"_neutral.rds
 kappa_mean <- dat_fit%>%
   dplyr::select(id,degree,video_set,emotion,Pt.group)%>%
   'colnames<-'(c("subject","degree","video_set", "emotion","group"))%>%
-  drop_na(degree)%>%
   group_by(subject,group,emotion,video_set)%>%
-  summarise(kp_mean = rho.circular(degree),
+  drop_na(degree)%>%
+  summarise(kp_mean = 1-rho.circular(degree),
             log_rho = log(kp_mean))
 
 # Calculate resultant mean for neutral dataset
@@ -66,7 +71,7 @@ dat_neutral <- dat_neutral%>%
   drop_na(theta)%>%
   group_by(subject,group,video_set)%>%
   summarise(kp_mean = mean.circular(theta),
-            kp_mean = rho.circular(kp_mean),
+            kp_mean = 1-rho.circular(kp_mean),
             log_rho = log(kp_mean))
 
 # Plot Rho subtle vs full ----------------------------------------------
@@ -164,7 +169,7 @@ for(i in 1:length(emo)){
   # Generate model plot
   plot <- flexplot::visualize(fit, plot = "model", sample = 20) +
     theme(legend.position = "none") +
-    ylab("Uncertainty log(kappa)") +
+    ylab("Uncertainty log(1-kappa)") +
     xlab(paste("Video", emo[i]))
   
   # Create ANOVA table

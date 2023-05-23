@@ -1,12 +1,16 @@
 ###########################################################################
 #
 #  Experiment:  CARIPARO
-#  Programmer:  QUETTIER THOMAS
-#  Date:        19/05/2023
-#  Description: Computes dataset, plot, table, fit model for Intensity measure  
+#  Programmer:  QUETTIER THOMAS 
+#  Date:        0382022
+#     This script performs data analysis for the CARIPARO experiment, 
+#     specifically for the Intensity measure of the CPO_moebius_AMIM1 experiment. 
+#     It computes datasets, generates plots, tables, and fits a 
+#     mixed-effects model to analyze the emotion Intensity between ADFES and JeFFE.
+#
 #  Experiment CPO_moebius_AMIM1
 #
-#  Update:      19/05/2023
+#  Update:      23/05/2023
 ###########################################################################
 
 rm(list=ls()) # remove all objects
@@ -137,7 +141,8 @@ tab_intensity <- intensity_mean%>%
 # Save the table as an RDS file
 saveRDS(tab_intensity, file = here("objects", "intensity_tables.rds"))
 
-# Fit linear mixed-effects model for each emotion
+# Fit linear mixed-effects model for each emotion ---------------------------------------
+
 emo <- c("anger", "disgust", "fear", "happiness", "sadness", "surprise","neutral")
 
 for(i in 1:length(emo)){
