@@ -27,6 +27,7 @@ library(dplyr)
 library(emmeans)
 library(flextable)
 library(flexplot)
+library(ftExtra)
 library(ggplot2)
 library(here)
 library(kableExtra)
@@ -155,15 +156,15 @@ for(i in 1:length(emo)){
                 data = dat_neutral)
   }else{
     # Fit the model for each emotion
-    fit <- lmer(int_mean ~ video_set * group * correct + (1|subject),
+    fit <- lmer(int_mean ~ video_set * group  + (1|subject),
                 data = intensity_mean %>%
-                  filter(emotion == emo[i]))
+                  filter(emotion == emo[i] & correct == 1))
   }
   
   
   
   # Generate table summary
-  table <- tab_model(fit, show.df = TRUE, string.p = "p adjusted", p.adjust = "bonferroni")
+  table <- tab_model(fit, show.df = TRUE) #, string.p = "p adjusted", p.adjust = "bonferroni")
   
   # Perform ANOVA
   chiquadro <- car::Anova(fit, type = 3)

@@ -3,7 +3,7 @@
 #  Experiment:  CARIPARO
 #  Programmer:  QUETTIER THOMAS 
 #  Date:        0382022
-#  Description: Generate the dataset from Gorilla (https://app.gorilla.sc/) 
+#  Description: Generate the dataset from Psychopy
 #  Experiment CPO_moebius_AMIM1
 #
 #  Update:      23/08/2022
@@ -110,4 +110,4 @@ saveRDS(dat_neutral, file = file.path("data",paste0(datasetname,"_neutral.rds"))
 # 
 # END
 #
-#################################################a
+#################################################
