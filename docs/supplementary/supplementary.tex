@@ -1,0 +1,1007 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+\AddToHook{cmd/section/before}{\clearpage}
+\usepackage{titling}
+\setcounter{table}{0}
+\renewcommand*{\thetable}{S\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand*{\thefigure}{S\arabic{figure}}
+\usepackage{lscape}
+\newcommand{\blandscape}{\begin{landscape}}
+\newcommand{\elandscape}{\end{landscape}}
+\usepackage[nottoc]{tocbibind}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage{hhline}
+\newlength\Oldarrayrulewidth
+\newlength\Oldtabcolsep
+\usepackage{hyperref}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Mapping the Perception-space of Facial Expressions (Moebius Participants)},
+  pdfauthor={Thomas Quettier; Paola Sessa},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{\textbf{Mapping the Perception-space of Facial Expressions (Moebius Participants)}}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Supplementary Materials}
+\author{Thomas Quettier \and Paola Sessa}
+\date{}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\hypertarget{general-approach}{%
+\section{General approach}\label{general-approach}}
+
+The Geneva Emotion Wheel {[}GEW; Scherer (2005){]} allows having an intuitive and informative way to collect participants' responses in a facial expression perception task. Specifically, in a single measurement is possible to have information about the facial expression \emph{category} (i.e., the response angle around the circle) and \emph{intensity} (i.e., the distance from the center).
+
+\hypertarget{facial-expression-category}{%
+\subsection{Facial expression category}\label{facial-expression-category}}
+
+In order to measure the response angle for each trial we transformed Cartesian coordinates (\((x_i, y_i)\)) into polar coordinates (\((r_i, \theta_i)\)) as in Equation \eqref{eq:coord-polar}.
+
+\begin{equation}
+\theta_{ij} = tan^{-1}(\frac{y_{ij}}{x_{ij}})
+\label{eq:coord-polar}
+\end{equation}
+
+In this way we have the \emph{pressed angle} for each trial. Given that each emotion has an absolute location on the GEW, we calculated a \emph{position-free} index of performance computing the difference between the \emph{pressed angle} and the \emph{ideal angle} (i.e., the GEW location of the presented emotion).
+
+Then we calculated the \emph{ideal} angle for each presented emotion, in the middle of each wheel circle. To obtain a measure comparable between emotion, we calculated the angular difference between the \emph{ideal} and the pressed angle using the Equation \eqref{eq:ang-diff}
+
+\begin{equation}
+Bias = ((ideal - pressed) + 180) \mod 360 - 180
+\label{eq:ang-diff}
+\end{equation}
+
+This new measure (\emph{bias}) has several advantages. Despite each emotion have a different location within the wheel, each response is now expressed in a position-free metric. The \emph{bias} is centered on 0 if there is no response tendency away from the \emph{ideal} value. Otherwise, a systematic shift would move the circular mean away from 0, clockwise (positive values) or anticlockwise (negative values). In circular statistics, \emph{bias} is also called \emph{angular error} and is deffined as the difference between a reference angle and the subject's response. Other than the circular mean, also the spread on the circle (i.e., \emph{uncertainty} or resultant length) is an important performance measure. The \emph{bias} and the \emph{uncertainty} can be considered independent measures. The circular variance ranges between 0 (no \emph{uncertainty}) to 1 (maximum \emph{uncertainty}) and is defined as 1- mean resultant length.
+
+Given the periodicity of circular data, we cannot use standard statistical modeling tools (Cremers, Mulder, and Klugkist 2018; Cremers and Klugkist 2018). There are different ways to model circular data (see Cremers, Mulder, and Klugkist 2018 for an overview).
+
+\hypertarget{perceived-intensity}{%
+\subsection{Perceived Intensity}\label{perceived-intensity}}
+
+The emotion \emph{intensity} is expressed as the difference from the center of the GEW. Values close or far from the center represent respectively neutral and high facial expression intensity. We calculated the \emph{intensity} for each trial as the \emph{euclidean distance} between the \emph{center} and the \emph{pressed location}. Given that the GEW has been centered (i.e., the center has coordinates \(x = 0,y = 0\)), the distance from the center is calculated as Equation \eqref{eq:euclidean}.
+
+\begin{equation}
+I_{ij} = \sqrt{x^2 + y^2} 
+\label{eq:euclidean}
+\end{equation}
+
+\hypertarget{statistical-models}{%
+\subsection{Statistical models}\label{statistical-models}}
+
+For the response angle (i.e., \emph{bias} and \emph{uncertainty}) we decided to use a generalized linear mixed-effect model using bpnreg R package (v2.0.2; Jolien and Cremers 2021). It is based on the `embedding' approach to circular modelling and makes use of the projected normal distribution. Its estimation method is a Bayesian MCMC sampler. Further technical details can be found in Cremers, Mulder \& Klugkist (2018) and Cremers \& Klugkist (2018).
+
+\hypertarget{bpnme}{%
+\subsubsection{\texorpdfstring{\texttt{bpnme}}{bpnme}}\label{bpnme}}
+
+We fitted our models using the \texttt{bpnreg} package. According to different models the \texttt{bpnme} setup could be different in terms of \texttt{backend}, number of \texttt{iterations} and \texttt{chains} and the parallelization approach. The general approach for \texttt{bias/uncertainty} models is the following:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# the scale{-}location specification}
+\NormalTok{form }\OtherTok{\textless{}{-}} \FunctionTok{bf}\NormalTok{(theta\_cen }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ... }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{id), }
+\NormalTok{           kappa }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ... }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{id))}
+
+\FunctionTok{bpnreg}\NormalTok{(formula, }\CommentTok{\# model formula}
+       \AttributeTok{data =}\NormalTok{ dat\_neutral,}
+       \AttributeTok{its =}\NormalTok{ iter,}
+       \AttributeTok{burn =}\NormalTok{ burns,}
+       \AttributeTok{n.lag =}\NormalTok{ n.lags,}
+       \AttributeTok{seed =}\NormalTok{ seeds)}
+\end{Highlighting}
+\end{Shaded}
+
+For the \texttt{perceived\ intensity}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{lmer}\NormalTok{(int }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ... }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{id),}
+    \AttributeTok{data =}\NormalTok{ data,}
+    \AttributeTok{prior =}\NormalTok{ priors,}
+    \AttributeTok{family =} \FunctionTok{gaussian}\NormalTok{(),}
+    \AttributeTok{chains =} \DecValTok{15}\NormalTok{,}
+    \AttributeTok{cores =} \DecValTok{15}\NormalTok{,}
+    \AttributeTok{iter =} \DecValTok{4000}\NormalTok{,}
+    \AttributeTok{save\_pars =} \FunctionTok{save\_pars}\NormalTok{(}\AttributeTok{all =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{sample\_prior =} \StringTok{"yes"}\NormalTok{,}
+    \AttributeTok{seed =} \DecValTok{2022}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+For the \texttt{perceived\ intensity} models we use the same approach as the main models given the simpler fitting process.
+
+\hypertarget{raw-data}{%
+\subsection{Raw data}\label{raw-data}}
+
+The figure \ref{fig:gew-emotions} represents all participants' responses for each experimental condition, directly plotted on the GEW. The figure \ref{fig:gew-legend-neutral} represents the GEW legend and the responses to the neutral condition.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{supplementary_files/figure-latex/gew-legend-neutral-1} 
+
+}
+
+\caption{GEW legend (B) and responses to neutral facial expressions as a function of the Intensity (A)}\label{fig:gew-legend-neutral}
+\end{figure}
+
+\newpage
+\begin{landscape}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{supplementary_files/figure-latex/gew-emotions-1} 
+
+}
+
+\caption{GEW responses as a function of displayed Emotion, Intensity.}\label{fig:gew-emotions}
+\end{figure}
+
+\end{landscape}
+
+\hypertarget{fitted-models}{%
+\section{Fitted Models}\label{fitted-models}}
+
+Table \ref{tab:tab-info-models} depicts all fitted models with comparison criteria for \emph{bias} and \emph{uncertainty}.
+We performed model selection for our analysis of circular data using three criteria: the log pointwise predictive density (lppd) {[}1{]}, the deviance information criterion (DIC) {[}2{]}, and the Watanabe-Akaike information criterion (WAIC) {[}3{]}. These criteria enable us to evaluate the goodness of fit and model complexity, facilitating the selection of the most suitable model.
+
+\begin{landscape}
+
+\global\setlength{\Oldarrayrulewidth}{\arrayrulewidth}
+
+\global\setlength{\Oldtabcolsep}{\tabcolsep}
+
+\setlength{\tabcolsep}{0pt}
+
+\renewcommand*{\arraystretch}{1.5}
+
+
+
+\providecommand{\ascline}[3]{\noalign{\global\arrayrulewidth #1}\arrayrulecolor[HTML]{#2}\cline{#3}}
+
+\begin{longtable}[c]{|p{3.53in}|p{0.80in}|p{0.75in}|p{0.75in}|p{0.77in}}
+
+
+
+\ascline{1.5pt}{666666}{1-5}
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{model}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{lppd}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{DIC}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{WAIC}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{WAIC2}}} \\
+
+\ascline{1.5pt}{666666}{1-5}\endhead
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-415.96}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{836.25}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{836.76}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{836.78}}} \\
+
+
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ emotion\ +\ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-412.44}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{848.97}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{849.97}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{850.49}}} \\
+
+
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ intensity\ +\ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-414.85}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{837.82}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{838.51}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{838.57}}} \\
+
+
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ group\ +\ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-414.96}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{838.13}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{838.69}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{838.76}}} \\
+
+
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ emotion\ *\ intensity\ +\ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-408.56}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{865.35}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{866.82}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{868.89}}} \\
+
+
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ emotion\ *\ intensity\ *\ group\ +\ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-388.03}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{873.00}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{876.25}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{885.20}}} \\
+
+
+
+
+
+\multicolumn{1}{>{\raggedright}m{\dimexpr 3.53in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{theta\ \textasciitilde \ emotion\ +\ intensity\ +\ group\ +\ (1|subject)}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.8in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-410.40}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{852.97}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.75in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{853.76}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 0.77in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{854.64}}} \\
+
+\ascline{1.5pt}{666666}{1-5}
+
+
+
+\end{longtable}
+
+
+
+\arrayrulecolor[HTML]{000000}
+
+\global\setlength{\arrayrulewidth}{\Oldarrayrulewidth}
+
+\global\setlength{\tabcolsep}{\Oldtabcolsep}
+
+\renewcommand*{\arraystretch}{1}
+
+\end{landscape}
+
+In the next section we presented all fitted models using the same approach:
+
+\begin{itemize}
+\tightlist
+\item
+  the model name (the same name as the R object)
+\item
+  model output
+\end{itemize}
+
+\newpage
+
+\hypertarget{bias}{%
+\subsection{Bias}\label{bias}}
+
+\hypertarget{model6-theta-emotion-intensity-group-1-subject}{%
+\subsubsection{Model6; theta \textasciitilde{} emotion + intensity + group + (1 \textbar{} subject)}\label{model6-theta-emotion-intensity-group-1-subject}}
+
+\hypertarget{fixed-effects}{%
+\paragraph{Fixed Effects}\label{fixed-effects}}
+
+\global\setlength{\Oldarrayrulewidth}{\arrayrulewidth}
+
+\global\setlength{\Oldtabcolsep}{\tabcolsep}
+
+\setlength{\tabcolsep}{0pt}
+
+\renewcommand*{\arraystretch}{1.5}
+
+
+
+\providecommand{\ascline}[3]{\noalign{\global\arrayrulewidth #1}\arrayrulecolor[HTML]{#2}\cline{#3}}
+
+\begin{longtable}[c]{|p{1.14in}|p{1.14in}|p{1.09in}|p{1.14in}|p{1.01in}}
+
+\caption{}\label{tab:circular-tables}\\
+
+\ascline{1.5pt}{666666}{1-5}
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{mean}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{mode}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{sd}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{LB.HPD}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{UB.HPD}}}} \\
+
+\ascline{1.5pt}{666666}{1-5}\endhead
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.13168892}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.13485364}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.07524593}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.01301147}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.2814536}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.04062072}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.02869011}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.16943228}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.36187824}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.2997778}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.03955569}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.05169658}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.16378005}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.35788919}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.2813093}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.15129583}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.11645726}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.16727333}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.16838902}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.4828045}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.16481797}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.15874910}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.16618859}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.48600628}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.1512443}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.15549750}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.13508023}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.17489952}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.48428267}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.1946615}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.09350066}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.08667451}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.07527483}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.05510951}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.2391728}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.04116121}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.02169003}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.09in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.07607230}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.18697295}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.1076948}}} \\
+
+\ascline{1.5pt}{666666}{1-5}
+
+
+
+\end{longtable}
+
+
+
+\arrayrulecolor[HTML]{000000}
+
+\global\setlength{\arrayrulewidth}{\Oldarrayrulewidth}
+
+\global\setlength{\tabcolsep}{\Oldtabcolsep}
+
+\renewcommand*{\arraystretch}{1}
+
+\hypertarget{model}{%
+\paragraph{Model}\label{model}}
+
+\global\setlength{\Oldarrayrulewidth}{\arrayrulewidth}
+
+\global\setlength{\Oldtabcolsep}{\tabcolsep}
+
+\setlength{\tabcolsep}{0pt}
+
+\renewcommand*{\arraystretch}{1.5}
+
+
+
+\providecommand{\ascline}[3]{\noalign{\global\arrayrulewidth #1}\arrayrulecolor[HTML]{#2}\cline{#3}}
+
+\begin{longtable}[c]{|p{1.14in}|p{1.04in}|p{1.01in}|p{1.06in}|p{1.01in}}
+
+\caption{}\label{tab:circular-tables}\\
+
+\ascline{1.5pt}{666666}{1-5}
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{mean.SAM}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{mode.SAM}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{sd.SAM}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{LB.SAM}}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{\textbf{UB.SAM}}}} \\
+
+\ascline{1.5pt}{666666}{1-5}\endhead
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-1.97736}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.15279}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{97.18858}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-18.24389}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{11.07202}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.64734}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.29700}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{53.98124}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-11.44998}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{12.62828}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{1.93286}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.57029}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{20.90136}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-5.53577}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{8.02191}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-13.83949}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.81112}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{833.84703}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-25.27971}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{25.19315}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{1.69985}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.24666}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{230.87112}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-21.07630}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{21.78580}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-0.37871}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.22661}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{79.89989}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-6.60692}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{6.44703}}} \\
+
+\ascline{0.75pt}{666666}{1-5}
+
+
+
+\multicolumn{1}{>{\raggedleft}m{\dimexpr 1.14in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{1.19410}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.04in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{0.16743}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{40.13587}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.06in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{-4.34682}}} & \multicolumn{1}{>{\raggedleft}m{\dimexpr 1.01in+0\tabcolsep}}{\textcolor[HTML]{000000}{\fontsize{11}{11}\selectfont{4.91560}}} \\
+
+\ascline{1.5pt}{666666}{1-5}
+
+
+
+\end{longtable}
+
+
+
+\arrayrulecolor[HTML]{000000}
+
+\global\setlength{\arrayrulewidth}{\Oldarrayrulewidth}
+
+\global\setlength{\tabcolsep}{\Oldtabcolsep}
+
+\renewcommand*{\arraystretch}{1}
+
+\newpage
+
+\hypertarget{uncertainty}{%
+\subsection{Uncertainty}\label{uncertainty}}
+
+\hypertarget{model6-kappa-emotion-intensity-group-1subject}{%
+\subsubsection{Model6; kappa \textasciitilde{} emotion + intensity + group + (1\textbar subject)}\label{model6-kappa-emotion-intensity-group-1subject}}
+
+\$\texttt{NULL}
+V1
+1 Predictors
+2 (Intercept)
+3 emotion1
+4 emotion2
+5 emotion3
+6 emotion4
+7 emotion5
+8 intensity1
+9 group1
+10 correct {[}1{]}
+11 emotion1 Ã\u0097 intensity1
+12 emotion2 Ã\u0097 intensity1
+13 emotion3 Ã\u0097 intensity1
+14 emotion4 Ã\u0097 intensity1
+15 emotion5 Ã\u0097 intensity1
+16 emotion1 Ã\u0097 group1
+17 emotion2 Ã\u0097 group1
+18 emotion3 Ã\u0097 group1
+19 emotion4 Ã\u0097 group1
+20 emotion5 Ã\u0097 group1
+21 intensity1 Ã\u0097 group1
+22 emotion1 Ã\u0097 correct {[}1{]}
+23 emotion2 Ã\u0097 correct {[}1{]}
+24 emotion3 Ã\u0097 correct {[}1{]}
+25 emotion4 Ã\u0097 correct {[}1{]}
+26 emotion5 Ã\u0097 correct {[}1{]}
+27 intensity1 Ã\u0097 correct {[}1{]}
+28 group1 Ã\u0097 correct {[}1{]}
+29 emotion1 Ã\u0097 intensity1 Ã\u0097group1
+30 emotion2 Ã\u0097 intensity1 Ã\u0097group1
+31 emotion3 Ã\u0097 intensity1 Ã\u0097group1
+32 emotion4 Ã\u0097 intensity1 Ã\u0097group1
+33 emotion5 Ã\u0097 intensity1 Ã\u0097group1
+34 (emotion1 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+35 (emotion2 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+36 (emotion3 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+37 (emotion4 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+38 (emotion5 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+39 (emotion1 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+40 (emotion2 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+41 (emotion3 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+42 (emotion4 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+43 (emotion5 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+44 (intensity1 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+45 (emotion1 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+46 (emotion2 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+47 (emotion3 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+48 (emotion4 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+49 Random Effects
+50 σ2
+51 τ00subject
+52 ICC
+53 N subject
+54 Observations
+55 Marginal R2 / Conditional R2
+V2 V3 V4
+1 Estimates CI p
+2 145.05 127.56~--~162.54 \textless0.001
+3 -8.55 -21.97~--~4.87 0.211
+4 16.25 2.88~--~29.63 0.017
+5 -8.66 -22.11~--~4.80 0.207
+6 9.78 -3.43~--~22.99 0.146
+7 -14.05 -27.17~--~-0.94 0.036
+8 7.57 -3.63~--~18.76 0.185
+9 1.06 -16.30~--~18.42 0.905
+10 14.91 3.22~--~26.60 0.013
+11 -9.75 -23.16~--~3.66 0.154
+12 10.77 -2.65~--~24.19 0.115
+13 5.53 -7.96~--~19.01 0.421
+14 -0.93 -14.17~--~12.32 0.891
+15 -8.62 -21.52~--~4.27 0.189
+16 -1.08 -14.37~--~12.21 0.873
+17 -5.00 -18.37~--~8.38 0.463
+18 -0.30 -13.62~--~13.02 0.965
+19 0.60 -12.53~--~13.74 0.928
+20 3.30 -9.42~--~16.01 0.610
+21 1.73 -9.22~--~12.68 0.756
+22 0.81 -14.53~--~16.16 0.917
+23 -13.89 -29.13~--~1.36 0.074
+24 6.85 -8.54~--~22.24 0.382
+25 -2.36 -17.46~--~12.74 0.759
+26 7.59 -7.37~--~22.55 0.319
+27 4.29 -7.36~--~15.94 0.470
+28 0.08 -11.38~--~11.53 0.990
+29 -1.62 -15.70~--~12.45 0.821
+30 -4.73 -18.85~--~9.38 0.510
+31 -3.02 -17.17~--~11.12 0.674
+32 -1.69 -15.57~--~12.19 0.811
+33 -1.15 -8.53~--~6.23 0.760
+34 3.04 -12.26~--~18.35 0.696
+35 -10.28 -25.57~--~5.01 0.187
+36 -0.05 -15.47~--~15.38 0.995
+37 -3.85 -18.99~--~11.29 0.617
+38 8.42 -6.33~--~23.17 0.262
+39 1.17 -13.99~--~16.34 0.879
+40 4.33 -10.89~--~19.55 0.577
+41 -1.24 -16.49~--~14.00 0.873
+42 -4.31 -19.32~--~10.70 0.573
+43 1.21 -13.57~--~15.99 0.872
+44 -5.96 -17.40~--~5.49 0.307
+45 1.29 -15.28~--~17.86 0.878
+46 4.50 -12.06~--~21.05 0.594
+47 1.37 -15.27~--~18.02 0.871
+48 5.74 -10.61~--~22.09 0.490
+49
+50 624.80
+51 883.81
+52 0.59
+53 19
+54 412
+55 0.167 / 0.655
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.5542}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1687}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1928}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.0843}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+Predictors
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estimates
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+CI
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+p
+\end{minipage} \\
+\midrule()
+\endhead
+(Intercept) & 145.05 & 127.56~--~162.54 & \textless0.001 \\
+emotion1 & -8.55 & -21.97~--~4.87 & 0.211 \\
+emotion2 & 16.25 & 2.88~--~29.63 & 0.017 \\
+emotion3 & -8.66 & -22.11~--~4.80 & 0.207 \\
+emotion4 & 9.78 & -3.43~--~22.99 & 0.146 \\
+emotion5 & -14.05 & -27.17~--~-0.94 & 0.036 \\
+intensity1 & 7.57 & -3.63~--~18.76 & 0.185 \\
+group1 & 1.06 & -16.30~--~18.42 & 0.905 \\
+correct {[}1{]} & 14.91 & 3.22~--~26.60 & 0.013 \\
+emotion1 Ã intensity1 & -9.75 & -23.16~--~3.66 & 0.154 \\
+emotion2 Ã intensity1 & 10.77 & -2.65~--~24.19 & 0.115 \\
+emotion3 Ã intensity1 & 5.53 & -7.96~--~19.01 & 0.421 \\
+emotion4 Ã intensity1 & -0.93 & -14.17~--~12.32 & 0.891 \\
+emotion5 Ã intensity1 & -8.62 & -21.52~--~4.27 & 0.189 \\
+emotion1 Ã group1 & -1.08 & -14.37~--~12.21 & 0.873 \\
+emotion2 Ã group1 & -5.00 & -18.37~--~8.38 & 0.463 \\
+emotion3 Ã group1 & -0.30 & -13.62~--~13.02 & 0.965 \\
+emotion4 Ã group1 & 0.60 & -12.53~--~13.74 & 0.928 \\
+emotion5 Ã group1 & 3.30 & -9.42~--~16.01 & 0.610 \\
+intensity1 Ã group1 & 1.73 & -9.22~--~12.68 & 0.756 \\
+emotion1 Ã correct {[}1{]} & 0.81 & -14.53~--~16.16 & 0.917 \\
+emotion2 Ã correct {[}1{]} & -13.89 & -29.13~--~1.36 & 0.074 \\
+emotion3 Ã correct {[}1{]} & 6.85 & -8.54~--~22.24 & 0.382 \\
+emotion4 Ã correct {[}1{]} & -2.36 & -17.46~--~12.74 & 0.759 \\
+emotion5 Ã correct {[}1{]} & 7.59 & -7.37~--~22.55 & 0.319 \\
+intensity1 Ã correct {[}1{]} & 4.29 & -7.36~--~15.94 & 0.470 \\
+group1 Ã correct {[}1{]} & 0.08 & -11.38~--~11.53 & 0.990 \\
+emotion1 Ã intensity1 Ãgroup1 & -1.62 & -15.70~--~12.45 & 0.821 \\
+emotion2 Ã intensity1 Ãgroup1 & -4.73 & -18.85~--~9.38 & 0.510 \\
+emotion3 Ã intensity1 Ãgroup1 & -3.02 & -17.17~--~11.12 & 0.674 \\
+emotion4 Ã intensity1 Ãgroup1 & -1.69 & -15.57~--~12.19 & 0.811 \\
+emotion5 Ã intensity1 Ãgroup1 & -1.15 & -8.53~--~6.23 & 0.760 \\
+(emotion1 Ã intensity1) Ãcorrect {[}1{]} & 3.04 & -12.26~--~18.35 & 0.696 \\
+(emotion2 Ã intensity1) Ãcorrect {[}1{]} & -10.28 & -25.57~--~5.01 & 0.187 \\
+(emotion3 Ã intensity1) Ãcorrect {[}1{]} & -0.05 & -15.47~--~15.38 & 0.995 \\
+(emotion4 Ã intensity1) Ãcorrect {[}1{]} & -3.85 & -18.99~--~11.29 & 0.617 \\
+(emotion5 Ã intensity1) Ãcorrect {[}1{]} & 8.42 & -6.33~--~23.17 & 0.262 \\
+(emotion1 Ã group1) Ãcorrect {[}1{]} & 1.17 & -13.99~--~16.34 & 0.879 \\
+(emotion2 Ã group1) Ãcorrect {[}1{]} & 4.33 & -10.89~--~19.55 & 0.577 \\
+(emotion3 Ã group1) Ãcorrect {[}1{]} & -1.24 & -16.49~--~14.00 & 0.873 \\
+(emotion4 Ã group1) Ãcorrect {[}1{]} & -4.31 & -19.32~--~10.70 & 0.573 \\
+(emotion5 Ã group1) Ãcorrect {[}1{]} & 1.21 & -13.57~--~15.99 & 0.872 \\
+(intensity1 Ã group1) Ãcorrect {[}1{]} & -5.96 & -17.40~--~5.49 & 0.307 \\
+(emotion1 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 1.29 & -15.28~--~17.86 & 0.878 \\
+(emotion2 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 4.50 & -12.06~--~21.05 & 0.594 \\
+(emotion3 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 1.37 & -15.27~--~18.02 & 0.871 \\
+(emotion4 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 5.74 & -10.61~--~22.09 & 0.490 \\
+Random Effects & & & \\
+σ2 & 624.80 & & \\
+τ00subject & 883.81 & & \\
+ICC & 0.59 & & \\
+N subject & 19 & & \\
+Observations & 412 & & \\
+Marginal R2 / Conditional R2 & 0.167 / 0.655 & & \\
+\bottomrule()
+\end{longtable}
+
+\newpage
+
+\hypertarget{perceived-intensity-1}{%
+\subsection{Perceived intensity}\label{perceived-intensity-1}}
+
+\hypertarget{model6-magnitude-emotion-intensity-group-correct-1subject}{%
+\subsubsection{Model6; magnitude \textasciitilde{} emotion * intensity * group * correct + (1\textbar subject)}\label{model6-magnitude-emotion-intensity-group-correct-1subject}}
+
+\$\texttt{NULL}
+V1
+1 Predictors
+2 (Intercept)
+3 emotion1
+4 emotion2
+5 emotion3
+6 emotion4
+7 emotion5
+8 intensity1
+9 group1
+10 correct {[}1{]}
+11 emotion1 Ã\u0097 intensity1
+12 emotion2 Ã\u0097 intensity1
+13 emotion3 Ã\u0097 intensity1
+14 emotion4 Ã\u0097 intensity1
+15 emotion5 Ã\u0097 intensity1
+16 emotion1 Ã\u0097 group1
+17 emotion2 Ã\u0097 group1
+18 emotion3 Ã\u0097 group1
+19 emotion4 Ã\u0097 group1
+20 emotion5 Ã\u0097 group1
+21 intensity1 Ã\u0097 group1
+22 emotion1 Ã\u0097 correct {[}1{]}
+23 emotion2 Ã\u0097 correct {[}1{]}
+24 emotion3 Ã\u0097 correct {[}1{]}
+25 emotion4 Ã\u0097 correct {[}1{]}
+26 emotion5 Ã\u0097 correct {[}1{]}
+27 intensity1 Ã\u0097 correct {[}1{]}
+28 group1 Ã\u0097 correct {[}1{]}
+29 emotion1 Ã\u0097 intensity1 Ã\u0097group1
+30 emotion2 Ã\u0097 intensity1 Ã\u0097group1
+31 emotion3 Ã\u0097 intensity1 Ã\u0097group1
+32 emotion4 Ã\u0097 intensity1 Ã\u0097group1
+33 emotion5 Ã\u0097 intensity1 Ã\u0097group1
+34 (emotion1 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+35 (emotion2 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+36 (emotion3 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+37 (emotion4 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+38 (emotion5 Ã\u0097 intensity1) Ã\u0097correct {[}1{]}
+39 (emotion1 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+40 (emotion2 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+41 (emotion3 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+42 (emotion4 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+43 (emotion5 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+44 (intensity1 Ã\u0097 group1) Ã\u0097correct {[}1{]}
+45 (emotion1 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+46 (emotion2 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+47 (emotion3 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+48 (emotion4 Ã\u0097 intensity1 Ã\u0097group1) Ã\u0097 correct {[}1{]}
+49 Random Effects
+50 σ2
+51 τ00subject
+52 ICC
+53 N subject
+54 Observations
+55 Marginal R2 / Conditional R2
+V2 V3 V4
+1 Estimates CI p
+2 145.05 127.56~--~162.54 \textless0.001
+3 -8.55 -21.97~--~4.87 0.211
+4 16.25 2.88~--~29.63 0.017
+5 -8.66 -22.11~--~4.80 0.207
+6 9.78 -3.43~--~22.99 0.146
+7 -14.05 -27.17~--~-0.94 0.036
+8 7.57 -3.63~--~18.76 0.185
+9 1.06 -16.30~--~18.42 0.905
+10 14.91 3.22~--~26.60 0.013
+11 -9.75 -23.16~--~3.66 0.154
+12 10.77 -2.65~--~24.19 0.115
+13 5.53 -7.96~--~19.01 0.421
+14 -0.93 -14.17~--~12.32 0.891
+15 -8.62 -21.52~--~4.27 0.189
+16 -1.08 -14.37~--~12.21 0.873
+17 -5.00 -18.37~--~8.38 0.463
+18 -0.30 -13.62~--~13.02 0.965
+19 0.60 -12.53~--~13.74 0.928
+20 3.30 -9.42~--~16.01 0.610
+21 1.73 -9.22~--~12.68 0.756
+22 0.81 -14.53~--~16.16 0.917
+23 -13.89 -29.13~--~1.36 0.074
+24 6.85 -8.54~--~22.24 0.382
+25 -2.36 -17.46~--~12.74 0.759
+26 7.59 -7.37~--~22.55 0.319
+27 4.29 -7.36~--~15.94 0.470
+28 0.08 -11.38~--~11.53 0.990
+29 -1.62 -15.70~--~12.45 0.821
+30 -4.73 -18.85~--~9.38 0.510
+31 -3.02 -17.17~--~11.12 0.674
+32 -1.69 -15.57~--~12.19 0.811
+33 -1.15 -8.53~--~6.23 0.760
+34 3.04 -12.26~--~18.35 0.696
+35 -10.28 -25.57~--~5.01 0.187
+36 -0.05 -15.47~--~15.38 0.995
+37 -3.85 -18.99~--~11.29 0.617
+38 8.42 -6.33~--~23.17 0.262
+39 1.17 -13.99~--~16.34 0.879
+40 4.33 -10.89~--~19.55 0.577
+41 -1.24 -16.49~--~14.00 0.873
+42 -4.31 -19.32~--~10.70 0.573
+43 1.21 -13.57~--~15.99 0.872
+44 -5.96 -17.40~--~5.49 0.307
+45 1.29 -15.28~--~17.86 0.878
+46 4.50 -12.06~--~21.05 0.594
+47 1.37 -15.27~--~18.02 0.871
+48 5.74 -10.61~--~22.09 0.490
+49
+50 624.80
+51 883.81
+52 0.59
+53 19
+54 412
+55 0.167 / 0.655
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.5542}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1687}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1928}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.0843}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+Predictors
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estimates
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+CI
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+p
+\end{minipage} \\
+\midrule()
+\endhead
+(Intercept) & 145.05 & 127.56~--~162.54 & \textless0.001 \\
+emotion1 & -8.55 & -21.97~--~4.87 & 0.211 \\
+emotion2 & 16.25 & 2.88~--~29.63 & 0.017 \\
+emotion3 & -8.66 & -22.11~--~4.80 & 0.207 \\
+emotion4 & 9.78 & -3.43~--~22.99 & 0.146 \\
+emotion5 & -14.05 & -27.17~--~-0.94 & 0.036 \\
+intensity1 & 7.57 & -3.63~--~18.76 & 0.185 \\
+group1 & 1.06 & -16.30~--~18.42 & 0.905 \\
+correct {[}1{]} & 14.91 & 3.22~--~26.60 & 0.013 \\
+emotion1 Ã intensity1 & -9.75 & -23.16~--~3.66 & 0.154 \\
+emotion2 Ã intensity1 & 10.77 & -2.65~--~24.19 & 0.115 \\
+emotion3 Ã intensity1 & 5.53 & -7.96~--~19.01 & 0.421 \\
+emotion4 Ã intensity1 & -0.93 & -14.17~--~12.32 & 0.891 \\
+emotion5 Ã intensity1 & -8.62 & -21.52~--~4.27 & 0.189 \\
+emotion1 Ã group1 & -1.08 & -14.37~--~12.21 & 0.873 \\
+emotion2 Ã group1 & -5.00 & -18.37~--~8.38 & 0.463 \\
+emotion3 Ã group1 & -0.30 & -13.62~--~13.02 & 0.965 \\
+emotion4 Ã group1 & 0.60 & -12.53~--~13.74 & 0.928 \\
+emotion5 Ã group1 & 3.30 & -9.42~--~16.01 & 0.610 \\
+intensity1 Ã group1 & 1.73 & -9.22~--~12.68 & 0.756 \\
+emotion1 Ã correct {[}1{]} & 0.81 & -14.53~--~16.16 & 0.917 \\
+emotion2 Ã correct {[}1{]} & -13.89 & -29.13~--~1.36 & 0.074 \\
+emotion3 Ã correct {[}1{]} & 6.85 & -8.54~--~22.24 & 0.382 \\
+emotion4 Ã correct {[}1{]} & -2.36 & -17.46~--~12.74 & 0.759 \\
+emotion5 Ã correct {[}1{]} & 7.59 & -7.37~--~22.55 & 0.319 \\
+intensity1 Ã correct {[}1{]} & 4.29 & -7.36~--~15.94 & 0.470 \\
+group1 Ã correct {[}1{]} & 0.08 & -11.38~--~11.53 & 0.990 \\
+emotion1 Ã intensity1 Ãgroup1 & -1.62 & -15.70~--~12.45 & 0.821 \\
+emotion2 Ã intensity1 Ãgroup1 & -4.73 & -18.85~--~9.38 & 0.510 \\
+emotion3 Ã intensity1 Ãgroup1 & -3.02 & -17.17~--~11.12 & 0.674 \\
+emotion4 Ã intensity1 Ãgroup1 & -1.69 & -15.57~--~12.19 & 0.811 \\
+emotion5 Ã intensity1 Ãgroup1 & -1.15 & -8.53~--~6.23 & 0.760 \\
+(emotion1 Ã intensity1) Ãcorrect {[}1{]} & 3.04 & -12.26~--~18.35 & 0.696 \\
+(emotion2 Ã intensity1) Ãcorrect {[}1{]} & -10.28 & -25.57~--~5.01 & 0.187 \\
+(emotion3 Ã intensity1) Ãcorrect {[}1{]} & -0.05 & -15.47~--~15.38 & 0.995 \\
+(emotion4 Ã intensity1) Ãcorrect {[}1{]} & -3.85 & -18.99~--~11.29 & 0.617 \\
+(emotion5 Ã intensity1) Ãcorrect {[}1{]} & 8.42 & -6.33~--~23.17 & 0.262 \\
+(emotion1 Ã group1) Ãcorrect {[}1{]} & 1.17 & -13.99~--~16.34 & 0.879 \\
+(emotion2 Ã group1) Ãcorrect {[}1{]} & 4.33 & -10.89~--~19.55 & 0.577 \\
+(emotion3 Ã group1) Ãcorrect {[}1{]} & -1.24 & -16.49~--~14.00 & 0.873 \\
+(emotion4 Ã group1) Ãcorrect {[}1{]} & -4.31 & -19.32~--~10.70 & 0.573 \\
+(emotion5 Ã group1) Ãcorrect {[}1{]} & 1.21 & -13.57~--~15.99 & 0.872 \\
+(intensity1 Ã group1) Ãcorrect {[}1{]} & -5.96 & -17.40~--~5.49 & 0.307 \\
+(emotion1 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 1.29 & -15.28~--~17.86 & 0.878 \\
+(emotion2 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 4.50 & -12.06~--~21.05 & 0.594 \\
+(emotion3 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 1.37 & -15.27~--~18.02 & 0.871 \\
+(emotion4 Ã intensity1 Ãgroup1) Ã correct {[}1{]} & 5.74 & -10.61~--~22.09 & 0.490 \\
+Random Effects & & & \\
+σ2 & 624.80 & & \\
+τ00subject & 883.81 & & \\
+ICC & 0.59 & & \\
+N subject & 19 & & \\
+Observations & 412 & & \\
+Marginal R2 / Conditional R2 & 0.167 / 0.655 & & \\
+\bottomrule()
+\end{longtable}
+
+\hypertarget{suggestions-for-meta-analysis}{%
+\section{Suggestions for meta-analysis}\label{suggestions-for-meta-analysis}}
+
+In this section, there are some suggestions for including these results into a meta-analysis. Firstly, if the presented results are not sufficient, the online OSF repository (\url{https://osf.io/e2kcw/}) contains raw data to compute all relevant measures. In general, for Bayesian models, each parameter or posterior contrast has a full posterior probability. This makes the computation of new measures (e.g., standardized effect sizes) and standard errors relatively easy. The only difference from standard calculations is that each new measure will have a full posterior distribution. These new distributions can be summarized (e.g., using the median) and used for the meta-analytic model.
+
+\hypertarget{bias-1}{%
+\subsection{Bias}\label{bias-1}}
+
+To our knowledge, for the \emph{bias}, there is no straightforward standardized effect size measure to compute, especially for a meta-analytic model. A possibility is using a general index of overlap between two posterior distributions (e.g., for a specific post-hoc contrast) as proposed by Pastore and Calcagnì (2019). However, the meta-analytic comparison with standard effect sizes index is not straightforward.
+
+\hypertarget{uncertainty-1}{%
+\subsection{Uncertainty}\label{uncertainty-1}}
+
+For the \emph{uncertainty} it is possible to use directly the values from the posterior contrasts. The \emph{uncertainty} (i.e., \emph{circular variance}) is expressed on a scale from 0 to 1 (similar to a probability). All posterior contrasts can be interpreted as probability ratios and odds ratios. Also, the standard error can be calculated as the standard deviation of the posterior distribution. Furthermore, it is also possible to convert from odds ratio (or similar measures) to other effect size indexes (e.g., Cohen's \(d\), see \url{https://easystats.github.io/effectsize/reference/d_to_r.html}).
+
+\hypertarget{perceived-intensity-2}{%
+\subsection{Perceived Intensity}\label{perceived-intensity-2}}
+
+For the perceived intensity it is possible to use a standard Cohen's \(d\) measure. The only general caveat about calculating a Cohen's \(d\) with multilevel models concerns which standard deviation(s) to use (Brysbaert and Stevens 2018; Westfall, Kenny, and Judd 2014)
+
+\hypertarget{references}{%
+\section{References}\label{references}}
+
+\textbackslash end\{document\}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-Brysbaert2018-wp}{}}%
+Brysbaert, Marc, and Michael Stevens. 2018. {``Power Analysis and Effect Size in Mixed Effects Models: A Tutorial.''} \emph{J Cogn} 1 (1): 9. \url{https://doi.org/10.5334/joc.10}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Cremers2018-in}{}}%
+Cremers, Jolien, and Irene Klugkist. 2018. {``One Direction? A Tutorial for Circular Data Analysis Using {R} with Examples in Cognitive Psychology.''} \emph{Front. Psychol.} 9 (October): 2040. \url{https://doi.org/10.3389/fpsyg.2018.02040}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Cremers2018-gr}{}}%
+Cremers, Jolien, Kees Tim Mulder, and Irene Klugkist. 2018. {``Circular Interpretation of Regression Coefficients.''} \emph{Br. J. Math. Stat. Psychol.} 71 (1): 75--95. \url{https://doi.org/10.1111/bmsp.12108}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Pastore2019-tq}{}}%
+Pastore, Massimiliano, and Antonio Calcagnì. 2019. {``Measuring Distribution Similarities Between Samples: A {Distribution-Free} Overlapping Index.''} \emph{Front. Psychol.} 10 (May): 1089. \url{https://doi.org/10.3389/fpsyg.2019.01089}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Scherer2005-nc}{}}%
+Scherer, Klaus R. 2005. {``What Are Emotions? And How Can They Be Measured?''} \emph{Soc. Sci. Inf.} 44 (4): 695--729. \url{https://doi.org/10.1177/0539018405058216}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Westfall2014-im}{}}%
+Westfall, Jacob, David A Kenny, and Charles M Judd. 2014. {``Statistical Power and Optimal Design in Experiments in Which Samples of Participants Respond to Samples of Stimuli.''} \emph{J. Exp. Psychol. Gen.} 143 (5): 2020--45. \url{https://doi.org/10.1037/xge0000014}.
+
+\end{CSLReferences}
+
+\end{document}

@@ -1,0 +1,796 @@
+---
+title: "**CARIPARO EEG Experiment (Moebius vs control)**"
+subtitle: "Materials for thesis"
+author: 
+  - "Thomas Quettier"
+  - "Paola Sessa"
+# output: html_document
+output: bookdown::html_document2
+header-includes:
+- \usepackage{floatrow}
+- \usepackage{subfig}
+
+bibliography: references.bib  
+date: "2023-05-16"
+---
+<style type="text/css">
+   .main-container {max-width: 100%;}
+   .row {display: flex;}
+   .column {flex: 50%;}
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, cache=FALSE,include=FALSE}
+devtools::load_all()
+library(here)
+library(magrittr)
+library(tidyr)
+library(dplyr)
+library(kableExtra)
+library(flextable)
+library(ggplot2)
+library(sjPlot)
+library(XML)
+library(rlist)
+library(janitor)
+library(flexplot)
+library(bayestestR)
+library(BayesFactor)
+library(phia)
+library(bookdown)
+library(magick)
+library(ips)
+```
+
+```{r data, include=FALSE}
+# Objects -------------------------------------------
+# Make a vector of all your file paths
+file_paths <- list.files(path = here::here("objects/"), pattern = "\\.rds", full.names = TRUE)
+
+# Make a vector of file names
+file_names <-  gsub(pattern = "\\.rds$", replacement = "", x = basename(file_paths))
+
+# Read all your data into a list
+data_list <- lapply(file_paths, readRDS)
+
+# Assign file names to list elements
+names(data_list) <- file_names    
+
+# # models -------------------------------------------
+# #get list of files from a folder
+# file_paths <- list.files(path = c(here("models","theta"), here("models","kappa"),here("models","intensity")), pattern = "\\.RData", full.names = TRUE)
+# # Make a vector of file names
+# file_names <-  gsub(pattern = "\\.RData$", replacement = "", x = basename(file_paths))
+# # Make list
+# models <- as.list(file_names) #create empty list
+# names(models) <- file_names  
+# # Assign file names to list elements
+# for (i in 1:length(files)) {
+#   load(files[i],  temp_env <- new.env())
+#   models[[i]] <- as.list(temp_env)
+# }
+
+
+dat <- readRDS(here("data", "dataset_valid.rds"))
+emo_coords <- readRDS(here("objects", "emo_coords.rds"))
+captions <- get_captions(file = here("docs", "files", "supplementary-captions.txt"))
+
+```
+
+
+# General approach
+
+The Geneva Emotion Wheel [GEW; @Scherer2005-nc] allows having an intuitive and informative way to collect participants' responses in a facial expression perception task. Specifically, in a single measurement is possible to have information about the facial expression *category* (i.e., the response angle around the circle) and *intensity* (i.e., the distance from the center).
+
+## Facial expression category
+
+In order to measure the response angle for each trial we transformed Cartesian coordinates ($(x_i, y_i)$) into polar coordinates ($(r_i, \theta_i)$) as in Equation.
+
+\begin{equation}
+\theta_{ij} = tan^{-1}(\frac{y_{ij}}{x_{ij}})
+\end{equation}
+
+In this way we have the *pressed angle* for each trial. Given that each emotion has an absolute location on the GEW, we calculated a *position-free* index of performance computing the difference between the *pressed angle* and the *ideal angle* (i.e., the GEW location of the presented emotion).
+
+Then we calculated the *ideal* angle for each presented emotion, in the middle of each wheel circle. To obtain a measure comparable between emotion, we calculated the angular difference between the *ideal* and the pressed angle using the Equation.
+
+\begin{equation}
+Bias = ((ideal - pressed) + 180) \mod 360 - 180
+\end{equation}
+
+This new measure (*bias*) has several advantages. Despite each emotion have a different location within the wheel, each response is now expressed in a position-free metric. The *bias* is centered on 0 if there is no response tendency away from the *ideal* value. Otherwise, a systematic shift would move the circular mean away from 0, clockwise (positive values) or anticlockwise (negative values). In circular statistics, *bias* is also called *angular error* and is deffined as the difference between a reference angle and the subject's response. 
+
+Other than the circular mean, also the spread on the circle (i.e., *uncertainty* or resultant length) is an important performance measure. The *bias* and the *uncertainty* can be considered independent measures. The circular variance ranges between 0 (no *uncertainty*) to 1 (maximum *uncertainty*) and is defined as 1- mean resultant length. 
+
+Given the periodicity of circular data, we cannot use standard statistical modeling tools [@Cremers2018-gr; @Cremers2018-in]. There are different ways to model circular data [see @Cremers2018-gr for an overview]. 
+
+
+## Perceived Intensity
+
+The emotion *intensity* is expressed as the difference from the center of the GEW. Values close or far from the center represent respectively neutral and high facial expression intensity. We calculated the *intensity* for each trial as the *euclidean distance* between the *center* and the *pressed location*. Given that the GEW has been centered (i.e., the center has coordinates $x = 0,y = 0$), the distance from the center is calculated as Equation.
+
+\begin{equation}
+I_{ij} = \sqrt{x^2 + y^2}
+\end{equation}
+
+## Statistical models
+
+For the intensity responses, we Fit a linear mixed-effects model (LMM) to data, via REML or maximum likelihood.we used lme4 R package [v1.1-33; @lme4].
+
+For the intensity responses, we fit generalized linear models (glm), specified by giving a symbolic description of the linear predictor and a description of the error distribution. we used Stats R package (v.4.3.0; R Core Team (2012)).
+<!-- For the response angle (i.e., *bias*) we decided to normalized the angle error degree in order to apply non circular statistics.  -->
+
+<!-- use a generalized linear mixed-effect model using bpnreg R package [v2.0.2; @bpnreg]. It is based on the 'embedding' approach to circular modelling and makes use of the projected normal distribution. Its estimation method is a Bayesian MCMC sampler. Further technical details can be found in [@cremers2018assessing] and [@cremers2018one]. -->
+
+
+### lmer and glm
+
+<!-- We fitted our circular models using the `bpnreg` function According to different models the `bpnme` setup could be different in terms of `backend`, number of `iterations` and `chains` and the parallelization approach. The general approach for `bias` models is the following: -->
+
+<!-- ```{r circular-bpnreg, eval = FALSE, echo = TRUE} -->
+
+<!-- # the scale-location specification -->
+<!-- form <- bf(theta_cen ~ ... + (1|id)) -->
+
+<!-- bpnreg(formula, # model formula -->
+<!--        data = dataset, -->
+<!--        its = 5000, -->
+<!--        burn = 1000, -->
+<!--        n.lag = 3, -->
+<!--        seed = 101) -->
+<!-- ``` -->
+
+We fitted intensity models using the `lmer` function and accuracy using `glm`. The general approach is the following:
+
+```{r other_models, eval = FALSE, echo = TRUE}
+
+# the scale-location specification
+lmer(x ~ video_set * group + (1|subject),
+                data = data %>%
+                  filter(emotion))
+
+fit <- glm(x ~  group * video_set, data = x, family = binomial)
+```
+
+## Experiment info
+
+•*Stimuli:* selected from the Amsterdam Dynamic Facial Expression Set (ADFES) Jerusalem Facial Expressions of Emotion (JeFEE); 4 different identities (2 females and 2 males) for each dataset (ADFES: F01, F03, M02, M03;  JeFEE: JF1, JF2, JM1, JM2) and all the 6 basic facial expressions (happy, angry, afraid, disgusted, sad, surprised) plus neutral; (.mpeg were converted to .wmv using VideoProc Versione 4.1 Copyright © 2021 Digiarty)\
+
+•*Number of trials:* 8 identities (4 for each dataset) x 7 expressions = 56 x 1 cycles = Total 56 trials X 2 blocks = 112 trials (about 36 mins of experiment)\
+
+•*Paradigm:* To indicate on a Geneva Emotion Wheel the emotion expressed/felt in each video clip. Wheel 1 is the main recognized emotion, Wheel 2 is a possible secondary recognized emotion.\
+
+## Raw data
+
+The figure \@ref(fig:gewemotions) represents all participants' responses for each experimental condition, directly plotted on the GEW. The figure \@ref(fig:gewlegendneutral) represents the GEW legend and the responses to the neutral condition.
+
+```{r gewlegendneutral, fig.cap = "GEW legend (B) and responses to neutral facial expressions as a function of the Video set and group (A)", fig.width=12, out.width="80%",echo=FALSE, warning=FALSE}
+data_list$paper_plots$plot_gew_legend_neutral
+
+```
+
+
+```{r gewemotions, fig.cap = "GEW responses as a function of displayed Emotion, Video set and group.", fig.width=15, fig.height=10, out.width="80%", echo=FALSE, warning=FALSE}
+
+data_list$paper_plots$plot_gew_emotions
+
+```
+
+
+## Descriptive table 
+Table 1.1 represents all participants' demographic informations.
+\n
+```{r demotab, fig.width=10, fig.height=10, out.width="50%", echo=FALSE, warning=FALSE}
+data_list$paper_tables$demo_tab
+
+
+```
+
+Table 1.2 represents all participants' demographic summary informations.
+\n
+```{r demotabsum, fig.width=10, fig.height=10, out.width="50%", echo=FALSE, warning=FALSE}
+
+data_list$paper_tables$pt_tab
+
+```
+
+Table 1.3 represents all participants' responses for each experimental condition in terms of mean degree response (bias), variance (i.e., 1-kappa), intensity in px.
+\n
+```{r gewemotionstab, fig.width=10, fig.height=10, out.width="50%", echo=FALSE, warning=FALSE}
+data_list$paper_tables$tab_eda
+```
+
+
+# Results
+\elandscape
+<br/>
+In the next section we presented all fitted models for:\
+- Accuracy\
+- Bais\
+- Uncertainty\
+- Intencity\
+<br/>
+For each section will use the same approach:\
+- the model name (the same name as the R object)\
+- model outputs\
+<br/>
+\newpage
+
+## Accuracy
+<br/>
+
+```{r, acctab, echo = F, out.width="100%",  warning=FALSE,message=FALSE}
+data_list$table_accuracy
+```
+Table 2.1 represents participants' GW1 accuracy responses. 
+<br/>
+
+```{r, accfig1, echo = F, fig.cap = "Represents participants' GW1 responses mean frequencies. x = GEW labels, y = video emotion seen", out.width="100%", warning=FALSE,message=FALSE}
+data_list$plot_frequencies_gew1
+```
+<br/>
+
+```{r, accfig2, echo = F, fig.cap = "Represents participants' GW2  responses frequencies. x = GEW labels, y = video emotion seen", out.width="100%", warning=FALSE,message=FALSE}
+data_list$plot_frequencies_gew2
+```
+<br/>
+
+## Models (glm) 
+\n
+### surprise ~ video_set * group + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","accuracy","accuracy_surprise.RData"))
+table
+
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### anger ~ video_set * group  + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","accuracy","accuracy_anger.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### disgust ~ video_set * group  + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","accuracy","accuracy_disgust.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### fear ~ video_set * group + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","accuracy","accuracy_fear.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### happiness ~ video_set * group + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","accuracy","accuracy_happiness.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### sadness ~ video_set * group + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","accuracy","accuracy_sadness.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+<br/>
+
+
+<!-- \n -->
+<!-- ## Bias -->
+<!-- \n -->
+<!-- ```{r thetakappa, fig.cap = "Theta and Kappa Angle error responses as a function of displayed Emotion, Video set and group.", fig.width=15, fig.height=8, out.width="100%", echo=FALSE, warning=FALSE} -->
+
+<!-- data_list$paper_plots$plot_Theta_Kappa -->
+
+<!-- ``` -->
+<!-- \n -->
+
+<!-- ### surprise ~ video_set * group + (1|subject) -->
+<!-- \n -->
+
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","theta","bais_surprise.RData")) -->
+<!-- table -->
+
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### anger ~ video_set * group  + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","theta","bais_anger.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### disgust ~ video_set * group  + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","theta","bais_disgust.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### fear ~ video_set * group + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","theta","bais_fear.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### happiness ~ video_set * group + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","theta","bais_happiness.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### sadness ~ video_set * group + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","theta","bais_sadness.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- <br/> -->
+
+<!-- \n -->
+<!-- ## Uncertainty -->
+<!-- \n -->
+<!-- ### surprise ~ video_set * group + (1|subject) -->
+<!-- \n -->
+
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","kappa","uncertainty_surprise.RData")) -->
+<!-- table -->
+
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### anger ~ video_set * group  + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","kappa","uncertainty_anger.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### disgust ~ video_set * group  + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","kappa","uncertainty_disgust.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### fear ~ video_set * group + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","kappa","uncertainty_fear.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### happiness ~ video_set * group + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","kappa","uncertainty_happiness.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- ### sadness ~ video_set * group + (1|subject) -->
+<!-- \n -->
+<!-- <br/> -->
+<!-- <div class = "row"> -->
+<!--   <div class = "col col-lg-2"> -->
+<!--   \n -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,  echo = F,  warning=FALSE,message=FALSE} -->
+<!-- load(here("models","kappa","uncertainty_sadness.RData")) -->
+<!-- table -->
+<!-- chi_table -->
+<!-- ``` -->
+<!--   </div> -->
+<!--   <div class = "column"> -->
+<!-- ```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE} -->
+<!-- plot -->
+<!-- ``` -->
+<!--   </div> -->
+<!-- </div> -->
+
+<!-- <br/> -->
+
+\n
+## Perceived intensity
+\n
+### surprise ~ video_set * group * correct + (1|subject)
+\n
+
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_surprise.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### anger ~ video_set * group * correct + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_anger.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### disgust ~ video_set * group * correct + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_disgust.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### fear ~ video_set * group * correct + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_fear.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### happiness ~ video_set * group * correct + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_happiness.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### sadness ~ video_set * group * correct + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_sadness.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+### neutral ~ video_set * group  + (1|subject)
+\n
+<br/>
+<div class = "row">
+  <div class = "col col-lg-2">
+  \n
+  </div>
+  <div class = "column">
+```{r,  echo = F,  warning=FALSE,message=FALSE}
+load(here("models","intensity","intensity_neutral.RData"))
+table
+chi_table
+```
+  </div>
+  <div class = "column">
+```{r,fig.width=5,fig.height=5, echo = F,  warning=FALSE,message=FALSE}
+plot
+```
+  </div>
+</div>
+
+# References

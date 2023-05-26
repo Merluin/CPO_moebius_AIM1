@@ -2,10 +2,3 @@
 .Rhistory
 .RData
 .Ruserdata
-
-data/
-figures/
-docs/
-models/
-objects/
-table/
