@@ -11,6 +11,7 @@ dataset_moebius <- function(dataset_name)
   
   # packages
   library(tidyverse)
+  library(circular)
   devtools::load_all()
   
   # find nb of file
