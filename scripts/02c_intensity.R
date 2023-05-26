@@ -156,9 +156,9 @@ for(i in 1:length(emo)){
                 data = dat_neutral)
   }else{
     # Fit the model for each emotion
-    fit <- lmer(int_mean ~ video_set * group  + (1|subject),
+    fit <- lmer(int_mean ~ group  + (1|subject),
                 data = intensity_mean %>%
-                  filter(emotion == emo[i] & correct == 1))
+                  filter(emotion == emo[i] & correct == 1 & video_set == "JeFFE"))
   }
   
   

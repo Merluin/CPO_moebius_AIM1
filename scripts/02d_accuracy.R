@@ -56,6 +56,7 @@ dat <- readRDS(file.path("data",paste0(datasetname,"_valid.rds")))
 
 # Calculate mean intensity
 correct_data <-  dat_fit %>%
+  filter(Wheel.name == "GW1")%>%
   mutate(correct = ifelse(emotion == resp_emotion_label, 1, 0)) %>%
   dplyr::select(id,  video_set, emotion, Pt.group, correct) %>%
   'colnames<-'(c("subject" ,"video_set", "emotion", "group", "correct"))
@@ -65,27 +66,35 @@ accuracy<-correct_data%>%
   summarise(correct = sum(correct),
             acc = correct/8) # 8 = 4 video id * 2 blocks
 
+
 # Plot accuracy GWE 1 vs GWE 2 ----------------------------------------------
 
 # order as the wheel
 dat$resp_emotion_label <- factor(dat$resp_emotion_label, levels = emo_coords$emo_order)
 GEW <- c("GW1", "GW2")
+
 dat_summ <- dat %>%
   drop_na(emotion)%>%
-  mutate(video_set = Video.intensity)%>%
-  mutate(video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ))%>%
+  mutate(video_set = Video.intensity,
+         video_set = ifelse(video_set == "full","ADFES" , "JeFFE" ),
+         count = 1)%>%
   filter(emotion != "neutrality" ) %>%
+  group_by(Pt.code,emotion,video_set,Wheel.name, resp_emotion_label,Pt.group) %>%
+  summarise(n = sum(count))%>%
   group_by(emotion,video_set,Wheel.name, resp_emotion_label,Pt.group) %>%
-  summarise(n = n())
+  summarise(n = mean(n))
+
+  
+
 
 for(i in 1:length(GEW)){
 plot_gew_discrete <- dat_summ %>% 
   filter(Wheel.name == GEW[i] )%>%
   mutate(video_set = stringr::str_to_title(video_set)) %>% 
   clean_emotion_names(emotion) %>% 
-  ggplot(aes(x = resp_emotion_label, y = n, fill = video_set)) +
+  ggplot(aes(x = resp_emotion_label, y = n, fill = Pt.group)) +
   geom_col(position = position_dodge()) +
-  facet_grid(emotion~Pt.group) +
+  facet_grid(emotion~video_set) +
   cowplot::theme_minimal_hgrid() +
   theme_paper(font_size = 10) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1,
@@ -99,7 +108,7 @@ plot_gew_discrete <- dat_summ %>%
         legend.position = "bottom",
         strip.text = element_text(face = "bold", size = 10),
         panel.grid.major.x = element_blank()) +
-  labs(fill = "video_set")
+  labs(fill = "group")
 
 #save
 ggsave_plot(plot_gew_discrete,
@@ -136,11 +145,12 @@ for(i in 1:length(emo)){
   
   # Adatta il modello di regressione logistica
   x<-correct_data%>%
-    filter(emotion == emo[i])%>%
+    mutate(correct = as.factor(correct))%>%
+    filter(emotion == emo[i] , subject != 10)%>%
     na.omit()%>%
     mutate(video_set = as.factor(video_set))
   
-  fit <- glm(correct ~  group * video_set, data = x, family = binomial)
+  fit <- glm(correct ~  group * video_set , data = x, family = binomial)
   
   x$predicted_prob <- predict(fit, type = "response")
   
@@ -153,7 +163,7 @@ for(i in 1:length(emo)){
   #               filter(emotion == emo[i])%>%na.omit())
   
   # Generate table summary
-  table <- tab_model(fit, show.df = TRUE, string.p = "p adjusted", p.adjust = "bonferroni")
+  table <- tab_model(fit, show.df = FALSE) #, string.p = "p adjusted", p.adjust = "bonferroni")
   
   # Perform ANOVA
   chiquadro <- car::Anova(fit, type = 3)
