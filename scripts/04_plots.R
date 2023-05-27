@@ -121,10 +121,10 @@ plot_gew_emotions <- dat_plot %>%
 
 plot_gew_emotions_GW1 <- dat_plot %>% 
   filter(emotion != "Neutral", Wheel.task == "task", Wheel.name == "GW1") %>% 
-  ggplot(aes(x = x_cen, y = y_cen, color = video_set)) +
+  ggplot(aes(x = x_cen, y = y_cen, color = Pt.group)) +
   ggpubr::background_image(bg) +
   geom_point(alpha = 0.5, size = 1) +
-  ggh4x::facet_nested( Pt.group + Wheel.name  ~ emotion) +
+  ggh4x::facet_nested( video_set  ~ emotion) +
   coord_fixed(xlim = c(-300, 300), ylim = c(-300, 300)) +
   theme_minimal() +
   theme(axis.text.x = element_blank(),
@@ -153,7 +153,7 @@ dplyr::select(id,Group,emotion,Wheel.name, video_set, diff, degree)%>%
             Kappa = rho.circular(degree, na.rm = TRUE)) %>%
   mutate(line = ifelse(Group == "control","dotted" , "solid" ))
 
-plot_Theta_Kappa3 <-meandegree_plot%>% 
+plot_Theta_Kappa <-meandegree_plot%>% 
   ggplot(aes(x=Theta, y=Kappa, color = Group , linetype = line ) ) +
   coord_polar() +
   expand_limits(x=c(-90,90)) +
