@@ -178,6 +178,11 @@ data_list$paper_plots$plot_gew_emotions
 
 ```
 
+```{r gewemotionsgw1, fig.cap = "GEW 1 responses as a function of displayed Emotion, Video set and group.", fig.width=15, fig.height=10, out.width="80%", echo=FALSE, warning=FALSE}
+
+data_list$paper_plots$plot_gew_emotions_GW1
+
+```
 
 ## Descriptive table 
 Table 1.1 represents all participants' demographic informations.
