@@ -25,6 +25,10 @@ datasetname<-"dataset"
 dataset_moebius(datasetname)
 load(file.path("data", paste0(datasetname,".rds")))
 
+
+data%>%
+  filter(Exp.trial==1)->x
+
 # Coordinates -------------------------------------------------------------
 
 dat <- data %>% 

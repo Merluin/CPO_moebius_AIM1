@@ -146,7 +146,7 @@ for(i in 1:length(emo)){
   # Adatta il modello di regressione logistica
   x<-correct_data%>%
     mutate(correct = as.factor(correct))%>%
-    filter(emotion == emo[i] , subject != 10)%>%
+    filter(emotion == emo[i] )%>%
     na.omit()%>%
     mutate(video_set = as.factor(video_set))
   
@@ -167,18 +167,6 @@ for(i in 1:length(emo)){
   
   # Perform ANOVA
   chiquadro <- car::Anova(fit, type = 3)
-  
-  # Generate model plot
-  plot <-   # Visualizza le stime di probabilità
-    ggplot(x, aes(x = group, y = predicted_prob, color = video_set)) +
-    geom_point(position = position_dodge(0.9), size = 3) +
-    labs(x = "Group", y = "Predicted Probability", color = "Video Set")
-    
-    # flexplot::visualize(fit, plot = "model") +
-    # theme(legend.position = "none") +
-    # ylab("accuracy") +
-    # xlab(paste("Video", emo[i]))
-    # 
   # Create ANOVA table
   chi_table <- chiquadro %>%
     drop_na(`Pr(>Chisq)`) %>%
@@ -187,8 +175,40 @@ for(i in 1:length(emo)){
     column_spec(4, color = ifelse(chiquadro$`Pr(>Chisq)` <= 0.05, "red", "black")) %>%
     kable_classic(full_width = F, html_font = "Cambria")
   
+  #Contrasts
+  group<- testInteractions(fit, pairwise = "group", adjustment = "fdr")
+  video<- testInteractions(fit, pairwise = "video_set", adjustment = "fdr")
+  interaction<- testInteractions(fit, pairwise = "group", fixed = "video_set", adjustment = "fdr")
+  
+  contrast<-rbind(group,
+                  video[1,],
+                  interaction[1,])
+  
+  p_red<- chiquadro
+  p_red[4,]<-p_red[3,]
+  
+  contrast<-contrast%>%
+    drop_na(`Pr(>Chisq)`) %>%
+    mutate(`Pr(>Chisq)` = round(`Pr(>Chisq)`, 3)) %>%
+    kbl(caption = "Contrasts (FDR corrected)") %>%
+    kable_classic(full_width = F, html_font = "Cambria")
+  
+  # Generate model plot
+  plot <-   # Visualizza le stime di probabilità
+    ggplot(x, aes(x = group, y = predicted_prob, color = video_set)) +
+    geom_point(position = position_dodge(0.9), size = 3) +
+    labs(x = "Group", y = "Predicted Probability", color = "Video Set")
+  
+  
+  # flexplot(correct~video_set + group, x) +
+  # theme(legend.position = "none") +
+  # ylab("accuracy") +
+  # xlab(paste("Video", emo[i]))
+  
+  
+  
   # Save the results
-  save(fit, table, chiquadro, plot, chi_table, file = file.path("models", "accuracy", paste0("accuracy_", emo[i], ".RData")))
+  save(fit, table, chiquadro, plot, chi_table,contrast, file = file.path("models", "accuracy", paste0("accuracy_", emo[i], ".RData")))
 }
 
 #################################################

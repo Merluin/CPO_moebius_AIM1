@@ -48,20 +48,11 @@ demo<- dat_fit%>%
   mutate(Exp.trial = 1:n()) %>% 
   ungroup()%>%
   filter(Exp.trial==1)%>%
-  dplyr::select(contains("Pt"))%>%
-  mutate(Pt.gender = ifelse(Pt.gender == "Uomo","Male","Female"))%>%
-  'colnames<-'(c("Subject","Gender","Education" ,"Age", "Sunnybrook","Group"))%>%
-  mutate(Match = case_when(Subject == 1  ~ 1,
-                           Subject == 2 ~ 12, Subject == 12 ~ 2,
-                           Subject == 3 ~ 13, Subject == 13 ~ 3,
-                           Subject == 4 ~ 19, Subject == 19 ~ 4,
-                           Subject == 5 ~ 15, Subject == 15 ~ 5,
-                           Subject == 6 ~ 16, Subject == 16 ~ 6,
-                           Subject == 7 ~ 14, Subject == 14 ~ 7,
-                           Subject == 8 ~ 18, Subject == 18 ~ 8,
-                           Subject == 9 ~ 11, Subject == 11 ~ 9,
-                           Subject == 10 ~ 17, Subject == 17 ~ 10))%>%
-  dplyr::select(Group,Subject,Match,Gender,Age,Education,Sunnybrook)
+  dplyr::select(Pt.group,Pt.code,Pt.match, Pt.gender, Pt.age, Pt.study,Pt.paralisi ,Pt.sunnybrookb,
+                FDI.fisica,FDI.sociale,TAS.20,AQ,OFMT,LPOST.TOT)%>%
+  'colnames<-'(c("Group","Subject","Match","Gender","Age" ,"Education","Paralisi" ,"Sunnybrook","FDI fisica",
+                 "FDI sociale", "TAS 20", "AQ", "OFMT", "L POST TOT"))
+
   
 demo_tab <- demo%>%  
   flextable_with_param%>%

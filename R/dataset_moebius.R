@@ -33,65 +33,106 @@ dataset_moebius <- function(dataset_name)
   
   # Demographic Dataset from google sheet
   # Files are .csv placed in "original_data/demography" folder
-  filedemo<-list.files("original_data/demography",pattern= 'Partecipanti') 
-  demo<- read.csv(file.path("original_data/demography",filedemo), sep=",", header=TRUE,stringsAsFactors = FALSE,na.strings= "aa")%>%
-    filter(group != "bell" & group != "")%>%
-    dplyr::select(-c(Nome,Cognome))
+  filedemo<-list.files("original_data/demography",pattern= '.csv') 
+  demo<- read.csv(file.path("original_data/demography",filedemo), sep=";", header=TRUE,stringsAsFactors = FALSE,na.strings= "aa")%>%
+    filter(GRUPPO != "bell" & GRUPPO != "")
   
   # combine Psychopy and Demographic datasets 
   # ID.subject is used to combine datasets
-  id <- parse_number(demo$ID.subject)
-  demo$ID.subject <- sprintf("%s_%s", id, demo$group)
-  dataset2<-left_join(dataset,demo%>%dplyr::select(ID.subject,Sunnybrook), by = "ID.subject")
+
+  demo$ID.subject <- sprintf("%s_%s", demo$ID, demo$GRUPPO)
+  dataset2<-left_join(dataset,demo%>%dplyr::select(-c(ID,ETA,SCOLARITA)), by = "ID.subject")
   
-  
+
+cols<-c("ID.subject",
+        "Exp.date",
+        "Exp.trial",
+        "Pt.code" ,
+        "Pt.gender",
+        "Pt.study",
+        "Pt.age",
+        "Pt.paralisi",
+        "Pt.sunnybrookb",
+        "Pt.group",
+        "Pt.match",
+        "FDI.fisica",
+        "FDI.sociale",
+        "TAS.20",
+        "AQ",
+        "OFMT",
+        "LPOST.TOT",
+        "LPOST.1",
+        "LPOST.2",
+        "LPOST.3",
+        "LPOST.4",
+        "LPOST.5",
+        "LPOST.6",
+        "LPOST.7",
+        "LPOST.8",
+        "LPOST.9",
+        "LPOST.10",
+        "LPOST.11",
+        "LPOST.12",
+        "LPOST.13",
+        "LPOST.14",
+        "LPOST.15",
+        "Wheel.name", 
+        "Wheel.rt", 
+        "Wheel.x", 
+        "Wheel.y", 
+        "Wheel.task", 
+        "Video.name", 
+        "Video.intensity", 
+        "Video.gender", 
+        "Video.emotion", 
+        "Video.id")
+
 Pct<-dataset2%>%
   filter(loop_practice.thisRepN>=0)%>%
-  dplyr::select("ID.subject","date","trial","subject","sex","education", "age","Sunnybrook","group",
-           "practice","primary.time","primary.x","primary.y",
-           "file_duration", "file", "file_emotion_level", "file_gender",
-           "file_emotion", "file_id")%>%
-    'colnames<-'(c("ID.subject","Exp.date","Exp.trial","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Pt.group",
-                   "Wheel.name", "Wheel.rt", "Wheel.x", "Wheel.y", "Wheel.task", 
-                   "Video.name", "Video.intensity", "Video.gender", "Video.emotion", "Video.id"))%>%
+  dplyr::select("ID.subject","date","trial","subject","GENERE","education","age","PARALISI","SUNNYBROOK","group",
+                "MATCH","FDI_fisica","FDI_sociale","TAS_20","AQ","OFMT","L_POST_TOT","L_POST_1","L_POST_2",
+                "L_POST_3","L_POST_4","L_POST_5","L_POST_6","L_POST_7","L_POST_8","L_POST_9","L_POST_10",
+                "L_POST_11","L_POST_12","L_POST_13","L_POST_14","L_POST_15", "practice","primary.time","primary.x",
+                "primary.y","file_duration", "file", "file_emotion_level","file_gender","file_emotion", "file_id")%>%
+    'colnames<-'(cols)%>%
     mutate(Wheel.name = "GW1" ,
            Wheel.task = "practice")
 
   
 Gw1<-dataset2%>%
   filter(exp_blocks.thisRepN >= 0)%>%
-  dplyr::select("ID.subject","date","trial","subject","sex","education", "age","Sunnybrook","group",
-         "practice","primary.time","primary.x","primary.y",
-         "file_duration", "file", "file_emotion_level", "file_gender",
-         "file_emotion", "file_id")%>%
-    'colnames<-'(c("ID.subject","Exp.date","Exp.trial","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Pt.group",
-                   "Wheel.name", "Wheel.rt", "Wheel.x", "Wheel.y", "Wheel.task", 
-                   "Video.name", "Video.intensity", "Video.gender", "Video.emotion", "Video.id"))%>%
+  dplyr::select("ID.subject","date","trial","subject","GENERE","education","age","PARALISI","SUNNYBROOK","group",
+                "MATCH","FDI_fisica","FDI_sociale","TAS_20","AQ","OFMT","L_POST_TOT","L_POST_1","L_POST_2",
+                "L_POST_3","L_POST_4","L_POST_5","L_POST_6","L_POST_7","L_POST_8","L_POST_9","L_POST_10",
+                "L_POST_11","L_POST_12","L_POST_13","L_POST_14","L_POST_15", "practice","primary.time","primary.x",
+                "primary.y","file_duration", "file", "file_emotion_level","file_gender","file_emotion", "file_id")%>%
+    'colnames<-'(cols)%>%
     mutate(Wheel.name = "GW1",
            Wheel.task = "task")%>%
     drop_na(Video.id)
 
 Gw2<-dataset2%>%
   filter(exp_blocks.thisRepN >= 0)%>%
-  dplyr::select("ID.subject","date","trial","subject","sex","education", "age","Sunnybrook","group",
-         "practice","secondary.time","secondary.x","secondary.y",
+  dplyr::select("ID.subject","date","trial","subject","GENERE","education","age","PARALISI","SUNNYBROOK","group",
+                "MATCH","FDI_fisica","FDI_sociale","TAS_20","AQ","OFMT","L_POST_TOT","L_POST_1","L_POST_2",
+                "L_POST_3","L_POST_4","L_POST_5","L_POST_6","L_POST_7","L_POST_8","L_POST_9","L_POST_10",
+                "L_POST_11","L_POST_12","L_POST_13","L_POST_14","L_POST_15", "practice","secondary.time","secondary.x","secondary.y",
          "file_duration", "file", "file_emotion_level", "file_gender",
          "file_emotion", "file_id")%>%
-  'colnames<-'(c("ID.subject","Exp.date","Exp.trial","Pt.code" ,"Pt.gender","Pt.study","Pt.age","Pt.sb","Pt.group",
-                 "Wheel.name", "Wheel.rt", "Wheel.x", "Wheel.y", "Wheel.task", 
-                 "Video.name", "Video.intensity", "Video.gender", "Video.emotion", "Video.id"))%>%
+  'colnames<-'(cols)%>%
   mutate(Wheel.name = "GW2",
          Wheel.task = "task")%>%
   drop_na(Video.id)
 
 
 data <- rbind(Pct,Gw1, Gw2)%>%
+  drop_na(Pt.gender)%>%
     mutate(
            Exp.trial = as.numeric(Exp.trial),
-           Pt.code = as.factor(Pt.code),
-           Pt.gender = ifelse(Pt.gender == "f","Donna","Uomo"),
-           Pt.gender = as.factor(Pt.gender),
            Pt.group = as.factor(Pt.group),
+           Pt.code = as.factor(Pt.code),
+           Pt.gender = ifelse(Pt.gender == "M","Uomo","Donna"),
+           Pt.gender = as.factor(Pt.gender),
            Pt.study = as.numeric(Pt.study),
            Pt.age = as.numeric(Pt.age),
            Wheel.name = as.factor(Wheel.name),
