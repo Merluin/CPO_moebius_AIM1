@@ -25,8 +25,8 @@ run_script("scripts/01_dataset_builder.R")
 
 # Models
 
-run_script("scripts/02a_bais.R")
-run_script("scripts/02b_uncertainty.R")
+#run_script("scripts/02a_bais.R")
+#run_script("scripts/02b_uncertainty.R")
 run_script("scripts/02c_intensity.R")
 run_script("scripts/02d_accuracy.R")
 # Tables
