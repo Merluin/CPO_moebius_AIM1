@@ -23,11 +23,9 @@ devtools::load_all()
 
 datasetname<-"dataset"
 dataset_moebius(datasetname)
-load(file.path("data", paste0(datasetname,".rds")))
+load(file.path("objects", paste0(datasetname,".RData")))
 
 
-data%>%
-  filter(Exp.trial==1)->x
 
 # Coordinates -------------------------------------------------------------
 

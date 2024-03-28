@@ -39,7 +39,7 @@ dataset_moebius <- function(dataset_name)
   
   # combine Psychopy and Demographic datasets 
   # ID.subject is used to combine datasets
-
+  demo$ID <- ifelse(demo$ID >10,demo$ID-10,demo$ID)
   demo$ID.subject <- sprintf("%s_%s", demo$ID, demo$GRUPPO)
   dataset2<-left_join(dataset,demo%>%dplyr::select(-c(ID,ETA,SCOLARITA)), by = "ID.subject")
   
@@ -143,7 +143,7 @@ data <- rbind(Pct,Gw1, Gw2)%>%
            Wheel.x = as.numeric(Wheel.x),
            Wheel.y = as.numeric(Wheel.y),
            Wheel.rt = as.numeric(Wheel.rt),
-           Wheel.rt = round(Wheel.rt*1000,1),
+           Wheel.rt = round(Wheel.rt*1000,6),
            Wheel.rt = replace_na(Wheel.rt,19999),
            Video.intensity = as.factor(Video.intensity),
            Video.gender = as.factor(Video.gender),
@@ -165,8 +165,8 @@ data <- rbind(Pct,Gw1, Gw2)%>%
 
   
   
-  write.csv2(data, file= file.path("data",paste0(dataset_name,".csv")))
-  save(data,file= file.path("data",paste0(dataset_name,".rds")))
+
+  save(data,file= file.path("objects",paste0(dataset_name,".RData")))
   
   
 } #end function  
